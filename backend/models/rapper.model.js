@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const rapperSchema = new mongoose.Schema({
   username: {
@@ -6,7 +8,7 @@ const rapperSchema = new mongoose.Schema({
     required: [true, "Username is required"],
     unique: true,
     trim:true,
-    minlength: [3, "Username must be atleast 3 characters long"],
+    minlength: [3, "Username must be at least 3 characters long"],
     maxlength: [30, "Username cannot exceed 30 characters"],
   },
   image:{
@@ -44,5 +46,26 @@ const rapperSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+rapperSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+})
+
+rapperSchema.methods.generateAccessToken = async function() {
+  return jwt.sign({
+    _id: this._id,
+    email:this.email,
+    username: this.username,
+    fullName: this.fullName,
+    
+  }, 
+  process.env.ACCESS_SECRET_KEY,
+  {
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+  })
+}
+
 
 export const Rapper = mongoose.model('Rapper',rapperSchema) 
