@@ -1,12 +1,13 @@
 import React from "react"
+import Home from "./pages/home";
+import Hero from "./components/ui/Hero";
 
-import { Button } from "./components/ui/button"
 
 const App = () => {
   return (
     <div>
-      Hello
-      <Button variant="outline">Heyy There</Button>
+     <Home />
+    
     </div>
   )
 }
