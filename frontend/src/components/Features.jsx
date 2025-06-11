@@ -3,13 +3,13 @@ import { Target, Music, Vote } from 'lucide-react'
 
 const Features = () => {
   return (
-    <div id='how-it-works' className="container mx-auto">
+    <div id='how-it-works' className="container mx-auto mb-2">
           <h2 className="text-4xl font-bold text-center mb-12 text-red-600">
             How It Works
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className='bg-black p-10'>
+            <div className='bg-primary p-5 rounded-2xl'>
               <div className="w-16 h-16 ">
                 <Target className="w-8 h-8 text-red-600" />
               </div>
@@ -19,7 +19,7 @@ const Features = () => {
               </p>
             </div>
 
-            <div className='bg-black p-10'>
+            <div className='bg-primary p-10'>
               <div className="w-16 h-16 text-red-600">
                 <Music className="w-8 h-8 text-red-600" />
               </div>
@@ -29,7 +29,7 @@ const Features = () => {
               </p>
             </div>
 
-            <div className='bg-black p-10'>
+            <div className='bg-primary p-10'>
               <div className="w-16 h-16 text-red-600">
                 <Vote className="w-8 h-8 text-red-600" />
               </div>

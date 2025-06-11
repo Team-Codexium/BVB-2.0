@@ -2,7 +2,7 @@ import React from 'react'
 import {Mic} from 'lucide-react'
 const Footer = () => {
   return (
-    <div>
+    <div className='mt-4'>
           <div className="container mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>

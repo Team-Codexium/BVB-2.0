@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@theme {
+  --color-primary: oklch(13% 0.028 261.692);
+  --color-secondary: oklch(41% 0.159 10.272);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
