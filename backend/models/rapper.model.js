@@ -52,12 +52,14 @@ const rapperSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// hash password before saving user
 rapperSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 })
 
+// generate jwt token to mark session
 rapperSchema.methods.generateAccessToken = async function() {
   return jwt.sign({
     _id: this._id,
