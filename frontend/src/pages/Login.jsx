@@ -5,13 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Link } from "react-router-dom"
 
-export default function Register() {
+const Login = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    fullName: '',
     email: '',
-    password: '',
-    isRapper: false,
+    password: ''
   })
 
   const handleSubmit = async (e) => {
@@ -25,6 +22,7 @@ export default function Register() {
       //   body: JSON.stringify(formData)
       // })
       // const data = await response.json()
+      // console.log(data)
       console.log(formData)
     } catch (error) {
       console.error('Error:', error)
@@ -32,10 +30,9 @@ export default function Register() {
   }
 
   const handleChange = (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: value
+      [e.target.name]: e.target.value
     })
   }
 
@@ -43,34 +40,10 @@ export default function Register() {
     <div className="flex min-h-[40rem] items-center justify-center">
       <Card className="w-[350px] bg- text-white">
         <CardHeader>
-          <CardTitle className="text-2xl text- text-center">Register</CardTitle>
+          <CardTitle className="text-2xl text- text-center">Login</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleChange}
-                className="border-secondary"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="border-secondary"
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -95,26 +68,16 @@ export default function Register() {
                 required
               />
             </div>
-
-            <div className="space-y-2 flex justify-start items-center">
-              <Input
-                id="isRapper"
-                name="isRapper"
-                type="checkbox"
-                checked={formData.isRapper}
-                onChange={handleChange}
-                className="border-secondary w-5"
-              />
-              <Label className="ml-2 mb-2" htmlFor="isRapper">Register as Rapper</Label>
-            </div>
             <Button type="submit" className="w-full bg-primary cursor-pointer  hover:bg-primary/90">
               Register
             </Button>
           </form>
 
-          <p>Already have an account? <Link className='text-red-600' to="/login">Log in</Link></p>
+          <p>New here?<Link className='text-red-600' to="/register"> Register</Link></p>
         </CardContent>
       </Card>
     </div>
   )
 }
+
+export default Login
