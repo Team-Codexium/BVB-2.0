@@ -21,22 +21,22 @@ const battleSchema = new mongoose.Schema({
     rapper1: {
       audio: {
         type: String, // URL or file path to audio
-        required: [true, 'Audio verse for rapper1 is required']
+        // required: [true, 'Audio verse for rapper1 is required']
       },
       text: {
         type: String,
-        required: [true, 'Text verse for rapper1 is required'],
+        // required: [true, 'Text verse for rapper1 is required'],
         trim: true
       }
     },
     rapper2: {
       audio: {
         type: String, // URL or file path to audio
-        required: [true, 'Audio verse for rapper2 is required']
+        // required: [true, 'Audio verse for rapper2 is required']
       },
       text: {
         type: String,
-        required: [true, 'Text verse for rapper2 is required'],
+        // required: [true, 'Text verse for rapper2 is required'],
         trim: true
       }
     }

@@ -19,10 +19,11 @@ app.use(cookieParser())
 
 //Imports routers
 import rapperRoutes from "./routes/rapper.route.js"
-
+import battleRoutes from "./routes/battle.route.js"
 
 //Routes
 app.use("/api/auth", rapperRoutes);
+app.use("/api/battle", battleRoutes);
 
 
 

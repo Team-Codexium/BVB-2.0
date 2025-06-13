@@ -4,7 +4,8 @@ import { Rapper } from '../models/rapper.model.js'
 export const createBattle = async ( req,res) =>{
     try{
         const {rapper2Id,timeLimit,battleDate} = req.body;
-        const rapper1Id = req.user.id; // to be check based on authentication
+        const rapper1Id = req.rapper._id; // to be check based on authentication
+
 
         // Validation if rapper 2 is not present
         if(!rapper2Id) {
@@ -114,6 +115,7 @@ export const createBattle = async ( req,res) =>{
       .populate('contestants.rapper1', 'username fullName email rank')
       .populate('contestants.rapper2', 'username fullName email rank');
 
+      console.log(populatedBattle);
     // Send success response
     res.status(201).json({
       success: true,
@@ -154,4 +156,245 @@ export const createBattle = async ( req,res) =>{
     });
   }
 };
+
+
+export const acceptBattle = async (req, res) => {
+  try{
+    const {battleId} = req.params;
+    const rapperId = req.rapper._id;
+
+    // find the battle
+    const battle = await Battle.findById(battleId);
+
+    console.log(battle);
+    console.log(rapperId)
+
+    // check if battle exists
+    if(!battle){
+      return res.status(404).json({
+        success:false,
+        message:'Battle not found'
+      })
+    }
+
+    // check if battle is already accepted
+    if(battle.status !== 'pending'){
+      return res.status(400).json({
+        success:false,
+        message:'Battle is not pending'
+      })
+    }
+
+    // check if user is a contestant
+    const isContestant = battle.contestants.rapper2.toString() === rapperId.toString();
+    if(!isContestant){
+      return res.status(403).json({
+        success:false,
+        message:'You are not a contestant in this battle'
+      })
+    }
+
+    const updatedBattle = await Battle.findByIdAndUpdate(
+      battleId,
+      { status: 'active' },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Battle accepted successfully',
+      data: updatedBattle
+    })
+
+  } catch (error) {
+    console.error('Error accepting battle:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while accepting battle'
+    });
+  }
+}
+
+export const handleTimeLimitExpiration = async (req, res) => {
+  try {
+    const { battleId } = req.params;
+    
+    // Find the battle
+    const battle = await Battle.findById(battleId);
+    
+    if (!battle) {
+      return res.status(404).json({
+        success: false,
+        message: 'Battle not found'
+      });
+    }
+
+    // Check if battle is active
+    if (battle.status !== 'active') {
+      return res.status(400).json({
+        success: false,
+        message: 'Battle is not active'
+      });
+    }
+
+    // Calculate if time limit has expired
+    const battleStartTime = new Date(battle.battleDate);
+    const currentTime = new Date();
+    const timeElapsed = (currentTime - battleStartTime) / 1000; // Convert to seconds
+
+    if (timeElapsed < battle.timeLimit) {
+      return res.status(400).json({
+        success: false,
+        message: 'Time limit has not expired yet',
+        remainingTime: battle.timeLimit - timeElapsed
+      });
+    }
+
+    // Determine winner based on submissions
+    let winner = null;
+    const rapper1Submission = battle.verses.rapper1.text && battle.verses.rapper1.audio;
+    const rapper2Submission = battle.verses.rapper2.text && battle.verses.rapper2.audio;
+
+    if (rapper1Submission && !rapper2Submission) {
+      winner = battle.contestants.rapper1;
+    } else if (!rapper1Submission && rapper2Submission) {
+      winner = battle.contestants.rapper2;
+    } else if (!rapper1Submission && !rapper2Submission) {
+      winner = 'draw'; // Both failed to submit
+    }
+    // If both submitted, winner will be determined by voting/judging system
+    // You can add additional logic here for judging criteria
+
+    // Update battle status and handle incomplete submissions
+    const updatedBattle = await Battle.findByIdAndUpdate(
+      battleId,
+      {
+        status: 'completed',
+        winner: winner,
+        $set: {
+          'verses.rapper1.text': battle.verses.rapper1.text || 'No submission',
+          'verses.rapper2.text': battle.verses.rapper2.text || 'No submission',
+          'verses.rapper1.audio': battle.verses.rapper1.audio || '',
+          'verses.rapper2.audio': battle.verses.rapper2.audio || '',
+          endTime: currentTime
+        }
+      },
+      { new: true }
+    ).populate('contestants.rapper1', 'username fullName email rank')
+     .populate('contestants.rapper2', 'username fullName email rank')
+     .populate('winner', 'username fullName email rank');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Battle time limit expired and status updated',
+      data: updatedBattle
+    });
+
+  } catch (error) {
+    console.error('Error handling time limit expiration:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while handling time limit expiration'
+    });
+  }
+};
+
+
+export const getBattleById = async (req, res) => {
+  try{
+    const {battleId} = req.params;
+    const battle = await Battle.findById(battleId);
+
+    if(!battle){
+      return res.status(404).json({
+        success:false,
+        message:'Battle not found'
+      })
+    }
+    
+    return res.status(200).json({
+      success:true,
+      message:'Battle found',
+      data:battle
+    })
+    
+  } catch (error) {
+    console.error('Error getting battle by ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while getting battle by ID'
+    });
+  }
+}
+
+
+export const getBattleByRapperId = async (req, res) => {
+  try{
+    const {rapperId} = req.params;
+    const battles = await Battle.find({
+      'contestants.rapper1': rapperId
+    }).populate('contestants.rapper1', 'username fullName email rank')
+    .populate('contestants.rapper2', 'username fullName email rank')
+    .populate('winner', 'username fullName email rank');
+
+    return res.status(200).json({
+      success:true,
+      message:'Battles found',
+      data:battles
+    })
+    
+  } catch (error) {
+    console.error('Error getting battles by rapper ID:', error);
+    res.status(500).json({
+      success:false,  
+      message:'Internal server error while getting battles by rapper ID'
+    })
+  }
+}
+
+
+export const getAllBattles = async (req, res) => {
+  try{
+    const battles = await Battle.find()
+    .populate('contestants.rapper1', 'username fullName email rank')
+    .populate('contestants.rapper2', 'username fullName email rank')
+    .populate('winner', 'username fullName email rank');
+
+    return res.status(200).json({
+      success:true,
+      message:'All battles found',
+      data:battles
+    })
+
+  } catch (error) {
+    console.error('Error getting all battles:', error);
+    res.status(500).json({
+      success:false,
+      message:'Internal server error while getting all battles'
+    })
+  }
+}
+
+export const getBattleByStatus = async (req, res) => {
+  try{
+    const {status} = req.params;
+    const battles = await Battle.find({status:status})
+    .populate('contestants.rapper1', 'username fullName email rank')
+    .populate('contestants.rapper2', 'username fullName email rank')
+    .populate('winner', 'username fullName email rank');
+
+    return res.status(200).json({
+      success:true,
+      message:'Battles found',
+      data:battles
+    })
+
+  } catch (error) {
+    console.error('Error getting battles by status:', error);
+    res.status(500).json({
+      success:false,
+      message:'Internal server error while getting battles by status'
+    })
+  }
+}
 
