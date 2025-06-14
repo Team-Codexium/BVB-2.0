@@ -3,9 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from '../contexts/AuthContext'
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { register, error, validationErrors, clearErrors } = useAuth();
+
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -17,27 +23,33 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      // const response = await fetch('http://localhost:4000/api/v1/rappers/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(formData)
-      // })
-      // const data = await response.json()
-      console.log(formData)
+      await register(formData)
+      navigate('/dashboard')
     } catch (error) {
       console.error('Error:', error)
     }
   }
 
   const handleChange = (e) => {
+    clearErrors(); // Clear errors when user starts typing
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
       [e.target.name]: value
     })
   }
+
+  // Helper function to render field error
+  const renderFieldError = (fieldName) => {
+    if (validationErrors[fieldName]) {
+      return (
+        <p className="text-sm text-red-500 mt-1">
+          {validationErrors[fieldName]}
+        </p>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="flex min-h-[40rem] items-center justify-center">
@@ -46,6 +58,13 @@ export default function Register() {
           <CardTitle className="text-2xl text- text-center">Register</CardTitle>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -55,10 +74,12 @@ export default function Register() {
                 type="text"
                 value={formData.username}
                 onChange={handleChange}
-                className="border-secondary"
+                className={`border-secondary ${validationErrors.username ? 'border-red-500' : ''}`}
                 required
               />
+              {renderFieldError('username')}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -67,10 +88,12 @@ export default function Register() {
                 type="text"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="border-secondary"
+                className={`border-secondary ${validationErrors.fullName ? 'border-red-500' : ''}`}
                 required
               />
+              {renderFieldError('fullName')}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -79,10 +102,12 @@ export default function Register() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="border-secondary"
+                className={`border-secondary ${validationErrors.email ? 'border-red-500' : ''}`}
                 required
               />
+              {renderFieldError('email')}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -91,9 +116,10 @@ export default function Register() {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="border-secondary"
+                className={`border-secondary ${validationErrors.password ? 'border-red-500' : ''}`}
                 required
               />
+              {renderFieldError('password')}
             </div>
 
             <div className="space-y-2 flex justify-start items-center">
@@ -107,12 +133,18 @@ export default function Register() {
               />
               <Label className="ml-2 mb-2" htmlFor="isRapper">Register as Rapper</Label>
             </div>
-            <Button type="submit" className="w-full bg-primary cursor-pointer  hover:bg-primary/90">
+
+            <Button 
+              type="submit" 
+              className="w-full bg-primary cursor-pointer hover:bg-primary/90"
+            >
               Register
             </Button>
           </form>
 
-          <p>Already have an account? <Link className='text-red-600' to="/login">Log in</Link></p>
+          <p className="mt-4 text-center">
+            Already have an account? <Link className='text-red-600 hover:text-red-500' to="/login">Log in</Link>
+          </p>
         </CardContent>
       </Card>
     </div>
