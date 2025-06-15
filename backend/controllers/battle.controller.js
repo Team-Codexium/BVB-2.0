@@ -1,12 +1,12 @@
 import {Battle} from '../models/battle.model.js'
 import { Rapper } from '../models/rapper.model.js'
+import { sendEmail } from '../sendemail.js';
 
 export const createBattle = async ( req,res) =>{
     try{
         const {rapper2Id,timeLimit,battleDate} = req.body;
-        const rapper1Id = req.rapper._id; // to be check based on authentication
-
-
+        const rapper1Id = req.rapper._id;
+         // to be check based on authentication
         // Validation if rapper 2 is not present
         if(!rapper2Id) {
             return res.status(400).json({
@@ -52,6 +52,7 @@ export const createBattle = async ( req,res) =>{
         message: 'Opponent rapper not found'
       });
     }
+
 
     // Check if there's already a pending battle between these rappers
     const existingBattle = await Battle.findOne({
@@ -111,7 +112,30 @@ export const createBattle = async ( req,res) =>{
     ]);
 
 
-   const populatedBattle = await Battle.findById(savedBattle._id)
+    // notify the rapper2 throught email
+
+      const subject=`you have been challended from ${rapper1.username}`;
+      const emailbody=`
+          <h2>🔥 Rap Battle Challenge Incoming! 🔥</h2>
+          <p>Hey ${rapper2.username},</p>
+          <p><strong>${rapper1.username}</strong> has challenged you to a rap battle!</p>
+          <p> <b>Log in</b> to the website to accept or decline the challenge</p>
+          <a href="url" </a>
+           <p>🎤 Stay lyrical,<br>BarsVsBars Team</p>
+      `
+      try {
+          sendEmail(rapper2.email,subject,emailbody)
+        
+      } catch (error) {
+        console.log("email error in creating battle ")
+        console.error(error)
+
+      }
+
+
+      //email sent code completed
+
+       const populatedBattle = await Battle.findById(savedBattle._id)
       .populate('contestants.rapper1', 'username fullName email rank')
       .populate('contestants.rapper2', 'username fullName email rank');
 
@@ -162,12 +186,13 @@ export const acceptBattle = async (req, res) => {
   try{
     const {battleId} = req.params;
     const rapperId = req.rapper._id;
-
+    
     // find the battle
-    const battle = await Battle.findById(battleId);
-
-    // console.log(battle);
-    // console.log(rapperId)
+    const battle = await Battle.findById(battleId)
+    .populate('contestants.rapper1', 'username fullName email rank')
+    .populate('contestants.rapper2', 'username fullName email rank');
+    
+    
 
     // check if battle exists
     if(!battle){
@@ -193,7 +218,31 @@ export const acceptBattle = async (req, res) => {
         message:'You are not a contestant in this battle'
       })
     }
+      //emial to the rapper1 for notifying that challenget is accepted
 
+        //to get the detail of rapper1 and rapper2 in the particular battle
+        // we need to get the detail of rapper1 and rapper which we have populated earlie
+        const subject=`your challenge is accepte by ${battle.contestants.rapper2.username}`
+        const emailbody=`
+         <h2>🔥 Rap Battle Challenge Incoming! 🔥</h2>
+          <p>Hey ${battle.contestants.rapper1.username}</p>
+          <p><strong>${battle.contestants.rapper2.username}</strong> has accepted your challenge</p>
+          <p> <b>Log in</b> to the website to accept or decline the challenge</p>
+          <a href="url of login page" </a>
+           <p>🎤 Stay lyrical,<br>BarsVsBars Team</p>
+
+        `
+        try {
+          
+          sendEmail(battle.contestants.rapper1.equals,subject,emailbody)
+          
+        } catch (error) {
+           console.log("email error in accepting battle ")
+            console.error(error)
+
+        }
+  
+      //email sent code completed
     const updatedBattle = await Battle.findByIdAndUpdate(
       battleId,
       { status: 'active' },
@@ -298,8 +347,6 @@ export const handleTimeLimitExpiration = async (req, res) => {
     });
   }
 };
-
-
 export const getBattleById = async (req, res) => {
   try{
     const {battleId} = req.params;
