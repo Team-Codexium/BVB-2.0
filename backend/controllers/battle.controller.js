@@ -166,8 +166,8 @@ export const acceptBattle = async (req, res) => {
     // find the battle
     const battle = await Battle.findById(battleId);
 
-    console.log(battle);
-    console.log(rapperId)
+    // console.log(battle);
+    // console.log(rapperId)
 
     // check if battle exists
     if(!battle){
