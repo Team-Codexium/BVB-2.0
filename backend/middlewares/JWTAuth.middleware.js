@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 export const verifyRapperJWT = async(req, res, next) => {
   try {
     const token = req.cookie?.accessToken || req.header("Authorization").replace("Bearer ", "");
-    // console.log("token", token)
+    console.log("token", token)
 
     if (!token) {
       return res.status(401).json({success: false, message: "Token not found!"})
