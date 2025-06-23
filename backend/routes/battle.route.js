@@ -1,14 +1,16 @@
 import { Router } from "express";
 import { verifyRapperJWT } from "../middlewares/JWTAuth.middleware.js";
-import { acceptBattle, createBattle, getAllBattles, getBattleById, getBattleByRapperId, getBattleByStatus } from "../controllers/battle.controller.js";
+import { acceptBattle, createBattle, getAllBattles, getBattleById, getBattleByRapperId, getBattleByStatus, getQueryBattle, handleTimeLimitExpiration } from "../controllers/battle.controller.js";
 
 const router = Router();
 
-router.route("/create-battle").post(verifyRapperJWT,createBattle);
-router.route("/accept-battle/:battleId").put(verifyRapperJWT,acceptBattle);
-router.route("/get-battle-by-id/:battleId").get(verifyRapperJWT,getBattleById);
-router.route("/get-battle-by-rapper-id/:rapperId").get(verifyRapperJWT,getBattleByRapperId);
-router.route("/get-all-battles").get(getAllBattles);
-router.route("/get-battle-by-status/:status").get(getBattleByStatus);
+router.route("/create").post(verifyRapperJWT,createBattle);
+router.route("/accept/:battleId").put(verifyRapperJWT,acceptBattle);
+router.route("/:battleId").get(verifyRapperJWT,getBattleById);
+router.route("/rapper/:rapperId").get(verifyRapperJWT,getBattleByRapperId);
+router.route("/").get(getAllBattles);
+router.route("/status/:status").get(verifyRapperJWT, getBattleByStatus);
+router.route("/query").post(verifyRapperJWT, getQueryBattle)
+router.route("/expire/:battleId").post(verifyRapperJWT, handleTimeLimitExpiration);
 
-export default router
+export default router 

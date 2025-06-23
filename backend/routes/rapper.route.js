@@ -1,14 +1,26 @@
-import { Router } from "express";
-import { currentRapper, loginRapper, logoutRapper, registerRapper } from "../controllers/auth.controller.js";
-import { verifyRapperJWT } from "../middlewares/JWTAuth.middleware.js";
-import { createBattle } from "../controllers/battle.controller.js";
+import express from 'express';
+import {
+  getAllRappers,
+  getRapperById,
+  updateRapper,
+  deleteRapper
+} from '../controllers/rapper.controller.js';
 
-const router = Router();
+// Optionally, add authentication/authorization middleware as needed
+import { verifyRapperJWT } from '../middlewares/JWTAuth.middleware.js';
 
-router.route("/current-rapper").get(verifyRapperJWT, currentRapper)
-router.route("/register-rapper").post(registerRapper);
-router.route("/login-rapper").post(loginRapper)
-router.route("/logout-rapper").post(verifyRapperJWT, logoutRapper)
-router.route("/create-battle").post(createBattle)
+const router = express.Router();
 
-export default router
+// GET /api/rapper?search=&page=&limit=   (list, paginated, searchable)
+router.get('/', getAllRappers);
+
+// GET /api/rapper/:id   (get single rapper)
+router.get('/:id', getRapperById);
+
+// PUT /api/rapper/:id   (update rapper)
+router.put('/:id', verifyRapperJWT, updateRapper);
+
+// DELETE /api/rapper/:id   (delete rapper)
+router.delete('/:id', verifyRapperJWT, deleteRapper);
+
+export default router;

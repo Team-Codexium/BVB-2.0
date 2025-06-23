@@ -18,12 +18,14 @@ app.use(cookieParser())
 // api endpoints
 
 //Imports routers
-import rapperRoutes from "./routes/rapper.route.js"
+import authRoutes from "./routes/auth.route.js"
 import battleRoutes from "./routes/battle.route.js"
+import rapperRoutes from "./routes/rapper.route.js"
 
 //Routes
-app.use("/api/auth", rapperRoutes);
-app.use("/api/battle", battleRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/battles", battleRoutes);
+app.use("/api/rappers", rapperRoutes);
 
 
 
