@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const battleSchema = new mongoose.Schema({
 
-  // Storing contestants refernce 
+// Storing contestants refernce 
     contestants: {
     rapper1: {
       type: mongoose.Schema.Types.ObjectId,
@@ -13,35 +13,29 @@ const battleSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Rapper',
       required: [true, 'Second contestant is required']
-    }
+    } 
   },
 
-  // storing single audio and wriiten verse in text file of both rappers as object
-  verses: {
-    rapper1: {
-      audio: {
-        type: String, // URL or file path to audio
-        // required: [true, 'Audio verse for rapper1 is required']
-      },
-      text: {
-        type: String,
-        // required: [true, 'Text verse for rapper1 is required'],
-        trim: true
-      }
-    },
-    rapper2: {
-      audio: {
-        type: String, // URL or file path to audio
-        // required: [true, 'Audio verse for rapper2 is required']
-      },
-      text: {
-        type: String,
-        // required: [true, 'Text verse for rapper2 is required'],
-        trim: true
-      }
-    }
-  },
+  //array of url of audio coming from cloudinary of rapper1
 
+  rapper1_audio_urls:[
+    {
+      url: {
+        type: String,
+        required: [true, 'Audio URL for rapper1 is required']
+      },
+
+    }
+  ],
+  //array of url of audio coming from cloudinary of rapper2
+  rapper2_audio_urls:[
+    {
+      url: {
+        type: String,
+        required: [true, 'Audio URL for rapper2 is required']
+      },
+    }
+  ],
   // Store votes of individual rappers
   voting: {
     rapper1Votes: {

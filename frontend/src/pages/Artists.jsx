@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useArtist } from '../contexts/ArtistContext';
-
+import UploadAudio from '../components/audioUpload'; // Assuming this is the audio upload component
 const PAGE_SIZE = 20;
 
 const Artists = () => {
@@ -38,6 +38,7 @@ const Artists = () => {
 
   return (
     <div className="bg-custom-gradient min-h-screen p-6">
+      <UploadAudio />
       <div className="max-w-5xl mx-auto">
         <Card className="mb-6 bg-">
           <CardHeader>

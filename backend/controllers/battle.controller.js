@@ -1,6 +1,8 @@
 import {Battle} from '../models/battle.model.js'
 import { Rapper } from '../models/rapper.model.js'
 import { sendEmail } from '../sendemail.js';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+
 
 export const createBattle = async ( req,res) =>{
     try{
@@ -234,7 +236,7 @@ export const acceptBattle = async (req, res) => {
         `
         try {
           
-          sendEmail(battle.contestants.rapper1.equals,subject,emailbody)
+          sendEmail(battle.contestants.rapper1.email,subject,emailbody)
           
         } catch (error) {
            console.log("email error in accepting battle ")
@@ -263,7 +265,8 @@ export const acceptBattle = async (req, res) => {
     });
   }
 }
-
+//handletime limit expiration
+// this function will be called when the time limit of the battle is over
 export const handleTimeLimitExpiration = async (req, res) => {
   try {
     const { battleId } = req.params;

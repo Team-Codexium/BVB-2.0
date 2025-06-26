@@ -16,7 +16,7 @@ const generateToken =  async(id) => {
 export const registerRapper = async (req, res) => {
   try {
     const { username, email, fullName, password } = req.body;
-    // console.log(req.body)
+    //console.log(req.body)
 
     // Check if rapper already exists
     const existingRapper = await Rapper.findOne({
@@ -30,7 +30,7 @@ export const registerRapper = async (req, res) => {
       });
     }
 
-    console.log("3")
+   // console.log("3")
     // Create new rapper
     const rapper = await Rapper.create({
       username,

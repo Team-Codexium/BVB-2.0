@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const rapperSchema = new mongoose.Schema({
+const rapperSchema = new mongoose.Schema
+({
   username: {
     type: String,
     required: [true, "Username is required"],

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Upload } from "lucide-react";
 import { useBattle } from '../contexts/BattleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -60,6 +60,7 @@ const ExploreBattles = () => {
 
   return (
     <div className="min-h-screen p-6">
+      <UploadAudio />
       <div className="max-w-5xl mx-auto">
         <Card className="mb-6 bg-">
           <CardHeader>

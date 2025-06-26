@@ -8,6 +8,8 @@ import connectDB from './config/mongodb.js'
 const app = express()
 const port = process.env.PORT || 4000
 connectDB() // connecting database
+import { connectCloudinary } from './config/connectCloudinary.js'
+connectCloudinary();
 
 
 // middlewares
@@ -15,17 +17,19 @@ app.use(express.json())
 app.use(cors())
 app.use(cookieParser())
 
+
 // api endpoints
 
 //Imports routers
 import authRoutes from "./routes/auth.route.js"
 import battleRoutes from "./routes/battle.route.js"
 import rapperRoutes from "./routes/rapper.route.js"
-
+import mediaRoutes from "./routes/media.routes.js"
 //Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/battles", battleRoutes);
 app.use("/api/rappers", rapperRoutes);
+app.use("/api/media",mediaRoutes)
 
 
 
