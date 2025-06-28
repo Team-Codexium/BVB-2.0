@@ -1,7 +1,11 @@
 import nodemailer from 'nodemailer';
 
 export const sendEmail = async (to, subject, htmlContent) => {
-  const transporter = nodemailer.createTransport({
+
+  try
+  {
+    console.log("Sending email function startss");
+      const transporter = nodemailer.createTransport({
     service: 'gmail', 
     auth: {
       user: process.env.BVB_EMAIL,
@@ -9,10 +13,20 @@ export const sendEmail = async (to, subject, htmlContent) => {
     }
   });
 
-  await transporter.sendMail({
+  const result = await transporter.sendMail({
     from: process.env.BVB_EMAIL,
     to,
     subject,
     html: htmlContent
   });
+    if(!result) console.log("No result from nodemailer");
+
+  console.log("Email sent successfully:", result);
+  return { success: true, message: "Email sent successfully" };
+
+  }
+  catch (error) {
+    console.error("Error sending email:", error);
+    return { success: false, message: "Failed to send email" };
+  }
 };

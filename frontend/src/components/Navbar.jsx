@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Logo  from "./Logo"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -47,10 +48,10 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo/Brand */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
+              <div className="w-20 h-15 bg-gradient-to-r from-gray-600 to-white rounded-lg flex items-center justify-center">
+                <Logo className='w-20'/>
               </div>
-              <Link to="/"><h1 className="text-xl font-bold text-secondary dark:text-white">BARvsBAR</h1></Link>
+              <Link to="/"><h1 className="text-xl font-bold text-secondary dark:text-white">BarsVsBars</h1></Link>
             </div>
 
             {/* Search Bar */}

@@ -1,8 +1,6 @@
 import {Battle} from '../models/battle.model.js'
 import { Rapper } from '../models/rapper.model.js'
 import { sendEmail } from '../sendemail.js';
-import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
-
 
 export const createBattle = async ( req,res) =>{
     try{
@@ -187,7 +185,9 @@ export const createBattle = async ( req,res) =>{
 export const acceptBattle = async (req, res) => {
   try{
     const {battleId} = req.params;
-    const rapperId = req.rapper._id;
+    const rapper2Id = req.rapper._id;
+    //considering the rapper1 is one who create the battle and rapper2 is the one whp 
+    //accept the battle
     
     // find the battle
     const battle = await Battle.findById(battleId)
@@ -213,22 +213,25 @@ export const acceptBattle = async (req, res) => {
     }
 
     // check if user is a contestant
-    const isContestant = battle.contestants.rapper2.toString() === rapperId.toString();
+    
+    const isContestant = battle.contestants.rapper2.toString() === rapper2Id.toString();
     if(!isContestant){
       return res.status(403).json({
         success:false,
         message:'You are not a contestant in this battle'
       })
     }
+      const username1=battle.contestants.rapper1.username;//username of the rapper1
+      const username2=battle.contestants.rapper2.username;//username of the rapper2
       //emial to the rapper1 for notifying that challenget is accepted
 
         //to get the detail of rapper1 and rapper2 in the particular battle
         // we need to get the detail of rapper1 and rapper which we have populated earlie
-        const subject=`your challenge is accepte by ${battle.contestants.rapper2.username}`
+        const subject=`your challenge is accepte by ${username2}`
         const emailbody=`
          <h2>🔥 Rap Battle Challenge Incoming! 🔥</h2>
-          <p>Hey ${battle.contestants.rapper1.username}</p>
-          <p><strong>${battle.contestants.rapper2.username}</strong> has accepted your challenge</p>
+          <p>Hey ${username1}</p>
+          <p><strong>${username2}</strong> has accepted your challenge</p>
           <p> <b>Log in</b> to the website to accept or decline the challenge</p>
           <a href="url of login page" </a>
            <p>🎤 Stay lyrical,<br>BarsVsBars Team</p>
@@ -447,7 +450,6 @@ export const getBattleByStatus = async (req, res) => {
     })
   }
 }
-
 
 export const getQueryBattle = async (req, res) => {
   const { limit = 20, page = 1, sort = 'createdAt', status } = req.query;

@@ -4,14 +4,16 @@ import Navbar from '../components/Navbar'
 import Welcome from './Welcome'
 import Artists from './Artists'
 import CreateBattle from './ExploreBattles'
-import audioUpload from '../components/audioUpload.jsx'
+import { AppSidebar } from '../components/AppSidebar'
+
 
 const DashBoard = () => {
   return (
     <div>
+      <AppSidebar />
      
         <Navbar />
-        
+   
         
       <Routes>
        

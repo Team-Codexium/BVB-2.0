@@ -1,4 +1,4 @@
-import { connectCloudinary } from '../config/connectCloudinary.js';
+
 import { v2 as Cloudinary } from 'cloudinary';
 import multer from 'multer';
 import {Battle} from "../models/battle.model.js"
@@ -19,7 +19,7 @@ export const addAudioToBattle = async (req, res) => {
         message: "Battle ID and Rapper ID are required"
       });
     }
-    const battle =await Battle.findOne(battleId);
+    let battle =await Battle.findOne(battleId);
     if(!battle)
     {
       return res.status(400).json(
@@ -50,14 +50,24 @@ export const addAudioToBattle = async (req, res) => {
       folder: "battle-audio",
       resource_type: 'video'
     });
+    console.log("audio uploaded to Cloudinary successfully");
+    console.log(cloud_res);
 
     if(israpper1) battle.rapper1_audio_urls.push({url:cloud_res.secure_url});
     else battle.rapper2_audio_urls.push({url:cloud_res.secure_url});
+    const updatedBattle = await battle.save();
+      if(!updatedBattle)
+      {
+        return res.status(400).json(
+          {
+            success:false,
+            message:"Failed to update battle"
+          }
+        )
+      }
+    console.log("Battle updated with audio URL");
 
-
-
-    console.log("audio uploaded to Cloudinary successfully");
-    console.log(cloud_res);
+    
 
 
     res.json({
@@ -72,7 +82,129 @@ export const addAudioToBattle = async (req, res) => {
       message: "Failed to add audio to battle",
      
     });
-
-
   }
 };
+
+export const getAudioFromBattle=async(req,res)=>
+{
+  try
+  {
+    const { battleId, rapperId } = req.params;
+    if (!battleId || !rapperId) {
+      return res.status(400).json({
+        success: false,
+        message: "Battle ID and Rapper ID are required"
+      });
+    }
+    const battle =await Battle.findOne(battleId)
+    if(!battle)
+    {
+      return res.status(400).json(
+        {
+          success:false,
+          message:"Battle not found"
+        }
+      )
+    } 
+    const israpper1=battle.contestants.rapper1.toString()===rapperId;
+    const israpper2=battle.contestants.rapper2.toString()===rapperId;
+    if(!israpper1 && !israpper2)
+    {
+      return res.status(400).json(
+        {
+          success:false,
+          message:"Rapper not part of the battle"
+        }
+      )
+    }
+   
+    let audioUrls = [];
+    if(israpper1) audioUrls = battle.rapper1_audio_urls;
+    else audioUrls = battle.rapper2_audio_urls;
+
+      res.status(201).json(
+        {
+          success:true,
+          audioUrls:audioUrls
+        }
+      )
+  }
+  catch(error)
+  {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get audio from battle",
+    });
+  }
+}
+export const deleteAudioFromBattle=async(req,res)=>
+{
+    try
+    {
+        const { battleId, rapperId, index } = req.params;
+        if(!battleId || !rapperId || !index)
+        {
+          return res.status(400).json({
+            success: false,
+            message: "Battle ID, Rapper ID and Audio Index are required"
+          });
+        }
+        const battle = await Battle.findOne(battleId);
+        if (!battle) {
+          return res.status(400).json({
+            success: false,
+            message: "Battle not found"
+          });
+        }
+
+        const isRapper1 = battle.contestants.rapper1.toString() === rapperId;
+        const isRapper2 = battle.contestants.rapper2.toString() === rapperId;
+
+        if (!isRapper1 && !isRapper2) {
+          return res.status(400).json({
+            success: false,
+            message: "Rapper not part of the battle"
+          });
+        }
+        let audioUrls = [];
+        if (isRapper1) audioUrls = battle.rapper1_audio_urls;
+        else audioUrls = battle.rapper2_audio_urls;
+
+        if (index < 0 || index >= audioUrls.length) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid audio index"
+          });
+        }
+
+        audioUrls.splice(index, 1);
+
+        if(isRapper1) battle.rapper1_audio_urls = audioUrls;
+        else battle.rapper2_audio_urls = audioUrls;
+
+       const  battleres= battle.save()
+      if(!battleres)
+      {
+        return res.status(400).json({
+          success: false,
+          message: "Failed to update battle"
+        });
+      }
+
+        res.json({
+          success: true,
+          message: "Audio deleted successfully",
+          data: audioUrls
+        });
+      
+    }
+    catch(error)
+    {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete audio from battle",
+      });
+    }
+}
