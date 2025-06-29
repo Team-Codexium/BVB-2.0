@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import BattleCard from '../components/BattleCard';
+import AudioUpload from '../components/audioUpload';
 
 const SORT_OPTIONS = [
   { value: 'createdAt', label: 'Newest' },
@@ -60,7 +61,7 @@ const ExploreBattles = () => {
 
   return (
     <div className="min-h-screen p-6">
-      <UploadAudio />
+     <AudioUpload />
       <div className="max-w-5xl mx-auto">
         <Card className="mb-6 bg-">
           <CardHeader>
