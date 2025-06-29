@@ -142,7 +142,7 @@ export default function Component() {
         </div>
 
         {/* Recent Activity */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-500" />
@@ -187,7 +187,7 @@ export default function Component() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </main>
     </div>
   )

@@ -36,6 +36,8 @@ const Artists = () => {
   const handlePrev = () => setPage(p => Math.max(1, p - 1));
   const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
 
+  console.log(artists)
+
   return (
     <div className="bg-custom-gradient min-h-screen p-6">
       <UploadAudio />

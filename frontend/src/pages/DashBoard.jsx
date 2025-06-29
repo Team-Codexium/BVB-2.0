@@ -5,12 +5,13 @@ import Welcome from './Welcome'
 import Artists from './Artists'
 import CreateBattle from './ExploreBattles'
 import { AppSidebar } from '../components/AppSidebar'
+import { SidebarProvider } from "../components/ui/sidebar"
 
 
 const DashBoard = () => {
   return (
     <div>
-      <AppSidebar />
+      {/* <AppSidebar /> */}
      
         <Navbar />
    

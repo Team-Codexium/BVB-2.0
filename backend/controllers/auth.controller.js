@@ -1,4 +1,5 @@
 import { Rapper } from "../models/rapper.model.js";
+import { EmailVerification } from "../models/emailVerification.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -27,6 +28,15 @@ export const registerRapper = async (req, res) => {
       return res.status(409).json({
         success: false,
         message: "Rapper already exists with this email or username"
+      });
+    }
+
+    // Check if email is verified
+    const emailVerification = await EmailVerification.findOne({ email });
+    if (!emailVerification || !emailVerification.verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email must be verified before registration. Please verify your email first."
       });
     }
 

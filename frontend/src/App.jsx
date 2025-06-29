@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import DashBoard from "./pages/DashBoard";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./contexts/AuthContext";
 
@@ -22,11 +23,10 @@ const App = () => {
     <div className="bg-custom-gradient">
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+        <Route path="/email-verification" element={<EmailVerificationPage />} />
         
         {/* Root Route: If user, go to dashboard, else Home */}
-        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Home />} />
+        <Route path="/*" element={user ? <Navigate to="/dashboard" replace /> : <Home />} />
 
         {/* Protected Dashboard and nested routes */}
         <Route 

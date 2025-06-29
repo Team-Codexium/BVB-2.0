@@ -51,6 +51,47 @@ export const AuthProvider = ({ children }) => {
     throw err;
   };
 
+  // Email verification methods
+  const sendOTP = async (email) => {
+    try {
+      clearErrors();
+      const res = await axios.post(`${API_URL}/api/email-verification/send-otp`, { email });
+      return res.data;
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  const verifyOTP = async (email, otp) => {
+    try {
+      clearErrors();
+      const res = await axios.post(`${API_URL}/api/email-verification/verify-otp`, { email, otp });
+      return res.data;
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  const resendOTP = async (email) => {
+    try {
+      clearErrors();
+      const res = await axios.post(`${API_URL}/api/email-verification/resend-otp`, { email });
+      return res.data;
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  const checkEmailVerification = async (email) => {
+    try {
+      clearErrors();
+      const res = await axios.get(`${API_URL}/api/email-verification/check/${email}`);
+      return res.data;
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
   // Register
   const register = async (userData) => {
     setLoading(true);
@@ -144,6 +185,11 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     getCurrentUser,
+    // Email verification methods
+    sendOTP,
+    verifyOTP,
+    resendOTP,
+    checkEmailVerification,
   };
 
   return (
