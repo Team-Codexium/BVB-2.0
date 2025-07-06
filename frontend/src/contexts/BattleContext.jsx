@@ -41,7 +41,7 @@ export const BattleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/battles/${battleId}`, {
+      const res = await axios.get(`${API_URL}/api/battles/${battleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBattle(res.data.data);
@@ -60,7 +60,7 @@ export const BattleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/battles/rapper/${rapperId}`, {
+      const res = await axios.get(`${API_URL}/api/battles/rapper/${rapperId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBattles(res.data.data || []);
@@ -79,7 +79,7 @@ export const BattleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/battles/status/${status}`, {
+      const res = await axios.get(`${API_URL}/api/battles/status/${status}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBattles(res.data.data || []);
