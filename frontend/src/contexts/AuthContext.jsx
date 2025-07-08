@@ -134,6 +134,7 @@ export const AuthProvider = ({ children }) => {
       await axios.post(`${API_URL}/api/auth/logout-rapper`);
       setToken(null);
       setUser(null);
+      localStorage.removeItem("token");
     } catch (err) {
       handleApiError(err);
     } finally {

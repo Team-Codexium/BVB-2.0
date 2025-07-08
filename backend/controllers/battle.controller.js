@@ -4,10 +4,11 @@ import { sendEmail } from '../sendemail.js';
 
 export const createBattle = async ( req,res) =>{
     try{
-        const {rapper2Id,timeLimit,battleDate} = req.body;
+        const {rapper2Id,battleDate} = req.body;
         const rapper1Id = req.rapper._id;
          // to be check based on authentication
         // Validation if rapper 2 is not present
+        const timeLimit = 1440; // 1 day
         if(!rapper2Id) {
             return res.status(400).json({
                 success:false,

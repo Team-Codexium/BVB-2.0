@@ -6,8 +6,18 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { Search, Users, Swords, Bell, Trophy, Target, Zap, Crown, Flame, Star } from "lucide-react"
-import { Link } from 'react-router-dom'
+import { Search, Users, Swords, Bell, Trophy, Target, Zap, Crown, Flame, Star, LogOut, EllipsisVertical, Menu } from "lucide-react"
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const notifications = [
     {
@@ -42,6 +52,9 @@ const notifications = [
 const Navbar = () => {
     const [searchQuery, setSearchQuery] = useState("")
   const [notificationOpen, setNotificationOpen] = useState(false)
+  const {user, logout} = useAuth()
+  const navigate = useNavigate()
+  // console.log(user)
   return (
     <header className=" border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +68,7 @@ const Navbar = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-md mx-8">
+            <div className="flex-1 max-w-md mx-8 hidden md:flex">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input
@@ -69,7 +82,7 @@ const Navbar = () => {
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="items-center gap-3 hidden md:flex">
               <Button variant="ghost" size="sm" className="gap-2">
                 <Users className="w-4 h-4" />
                 <Link to="/dashboard/artists"><span className="hidden sm:inline">Artists</span></Link>
@@ -129,13 +142,67 @@ const Navbar = () => {
               </Popover>
 
               {/* Profile */}
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/dashboard/profile")}>
                 <Avatar className="w-6 h-6">
-                  <AvatarImage src="/placeholder.svg?height=24&width=24" />
-                  <AvatarFallback>MC</AvatarFallback>
+                  <AvatarImage src={user?.image} />
+                  <AvatarFallback>{user?.fullName[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="hidden sm:inline">Profile</span>
+                <span className="hidden sm:inline">{user?.fullName}</span>
               </Button>
+              <Button
+                        size="sm"
+                        className="flex items-center justify-start gap-2 bg-" 
+                        onClick={logout}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="">Logout</span>
+                    </Button>
+            </div>
+
+            <div className='flex md:hidden'>
+              <DropdownMenu className="bg-non">
+                <DropdownMenuTrigger>
+                <Menu className="w-8 h-8" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-blend-color-burn bg-custom-gradient">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Button variant="ghost" size="sm" className="flex items-center justify-start gap-2" onClick={() => navigate("/dashboard/profile")}>
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={user?.image} />
+                        <AvatarFallback className="text-primary">{user?.fullName[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-secondary hover:text-primary">{user?.fullName}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Button variant="ghost" size="sm" className="flex items-center justify-start gap-2">
+                      <Users className="w-4 h-4" />
+                      <Link to="/dashboard/artists"><span className="">Artists</span></Link>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Button
+                        size="sm"
+                        className="flex items-center justify-start gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      >
+                        <Swords className="w-4 h-4" />
+                        <Link to="/dashboard/explore-battle"><span className="">Explore Battle</span></Link>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                  <Button
+                        size="sm"
+                        className="flex items-center justify-start gap-2 bg-" 
+                        onClick={logout}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="">Logout</span>
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

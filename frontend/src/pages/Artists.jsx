@@ -6,6 +6,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useArtist } from '../contexts/ArtistContext';
 import UploadAudio from '../components/audioUpload'; // Assuming this is the audio upload component
+import { useBattle } from '../contexts/BattleContext';
+import { useAuth } from '../contexts/AuthContext';
 const PAGE_SIZE = 20;
 
 const Artists = () => {
@@ -13,6 +15,9 @@ const Artists = () => {
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
   const [page, setPage] = useState(1);
+
+  const { createBattle } = useBattle();
+  const {token} = useAuth();
 
   useEffect(() => {
     // Filter artists by search
@@ -36,7 +41,15 @@ const Artists = () => {
   const handlePrev = () => setPage(p => Math.max(1, p - 1));
   const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
 
-  console.log(artists)
+  // console.log(artists)
+
+  const handleChallenge = async (artistId) => {
+    // console.log("Challenge", artistId)
+    const data = {
+      rapper2Id: artistId
+    }
+    await createBattle(data, token);
+  } 
 
   return (
     <div className="bg-custom-gradient min-h-screen p-6">
@@ -90,7 +103,7 @@ const Artists = () => {
                         <span className="font-semibold">Rank:</span> {artist.rank || 'N/A'}
                       </div>
                     </div>
-                    <Button className="bg-red-600">Challenge</Button>
+                    <Button onClick={() => handleChallenge(artist._id)} className="bg-red-600">Challenge</Button>
                   </CardContent>
                 </Card>
               ))}
