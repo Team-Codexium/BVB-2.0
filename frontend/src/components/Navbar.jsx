@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { Search, Users, Swords, Bell, Trophy, Target, Zap, Crown, Flame, Star, LogOut, EllipsisVertical, Menu } from "lucide-react"
+import { Search, Users, Swords, Bell, Shield, LogOut, Menu } from "lucide-react"
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -96,7 +96,12 @@ const Navbar = () => {
                 <Link to="/dashboard/explore-battle"><span className="hidden sm:inline">Explore Battle</span></Link>
               </Button>
 
-              {/* Notifications */}
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Shield className="w-4 h-4" />
+                <Link to="/dashboard/my-battles"><span className="hidden sm:inline">My Battles</span></Link>
+              </Button>
+
+              
               <Popover open={notificationOpen} onOpenChange={setNotificationOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="sm" className="relative">
@@ -145,7 +150,7 @@ const Navbar = () => {
               <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/dashboard/profile")}>
                 <Avatar className="w-6 h-6">
                   <AvatarImage src={user?.image} />
-                  <AvatarFallback>{user?.fullName[0].toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{(user?.fullName || '?')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <span className="hidden sm:inline">{user?.fullName}</span>
               </Button>
@@ -171,7 +176,7 @@ const Navbar = () => {
                     <Button variant="ghost" size="sm" className="flex items-center justify-start gap-2" onClick={() => navigate("/dashboard/profile")}>
                       <Avatar className="w-6 h-6">
                         <AvatarImage src={user?.image} />
-                        <AvatarFallback className="text-primary">{user?.fullName[0].toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="text-primary">{(user?.fullName || '?')[0].toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <span className="text-secondary hover:text-primary">{user?.fullName}</span>
                     </Button>
@@ -180,6 +185,12 @@ const Navbar = () => {
                     <Button variant="ghost" size="sm" className="flex items-center justify-start gap-2">
                       <Users className="w-4 h-4" />
                       <Link to="/dashboard/artists"><span className="">Artists</span></Link>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Button variant="ghost" size="sm" className="flex items-center justify-start gap-2">
+                      <Shield className="w-4 h-4" />
+                      <Link to="/dashboard/my-battles"><span className="">My Battles</span></Link>
                     </Button>
                   </DropdownMenuItem>
                   <DropdownMenuItem>

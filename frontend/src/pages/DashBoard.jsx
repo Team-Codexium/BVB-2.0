@@ -8,6 +8,7 @@ import BattleDetails from './BattleDetails'
 import { AppSidebar } from '../components/AppSidebar'
 import { SidebarProvider } from "../components/ui/sidebar"
 import Profile from './Profile'
+import MyBattles from './MyBattles'
 
 
 const DashBoard = () => {
@@ -25,6 +26,7 @@ const DashBoard = () => {
         <Route path="/explore-battle" element={<CreateBattle />} />
         <Route path="/battle/:battleId" element={<BattleDetails />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/my-battles" element={<MyBattles />} />
       </Routes>
     </div>
   )
