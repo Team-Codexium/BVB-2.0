@@ -19,7 +19,7 @@ export const addAudioToBattle = async (req, res) => {
         message: "Battle ID and Rapper ID are required"
       });
     }
-    let battle =await Battle.findOne(battleId);
+    let battle = await Battle.findById(battleId);
     if(!battle)
     {
       return res.status(400).json(

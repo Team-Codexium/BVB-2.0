@@ -9,14 +9,15 @@ import { ArtistProvider } from './contexts/ArtistContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <BrowserRouter>
     <BattleProvider>
       <ArtistProvider>
         <AuthProvider>
-          <BrowserRouter>
+          
             <App />
-          </BrowserRouter>
         </AuthProvider>
       </ArtistProvider>
     </BattleProvider>
+          </BrowserRouter>
   </StrictMode>,
 )

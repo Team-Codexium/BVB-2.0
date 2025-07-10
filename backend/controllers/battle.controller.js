@@ -355,10 +355,14 @@ export const handleTimeLimitExpiration = async (req, res) => {
   }
 };
 export const getBattleById = async (req, res) => {
+  //this controller to be used to get the battle deatils 
+  //when some click on battle card 
   try{
     const {battleId} = req.params;
-    const battle = await Battle.findById(battleId);
-
+    const battle = await Battle.findById(battleId)
+    .populate('contestants.rapper1', 'username fullName email rank image')
+    .populate('contestants.rapper2', 'username fullName email rank image')
+    
     if(!battle){
       return res.status(404).json({
         success:false,
@@ -383,6 +387,8 @@ export const getBattleById = async (req, res) => {
 
 
 export const getBattleByRapperId = async (req, res) => {
+  // this controller to be used for displaying the 
+  //my battles page of current rapper thorugh his id
   try{
     const {rapperId} = req.params;
     const battles = await Battle.find({
@@ -408,6 +414,8 @@ export const getBattleByRapperId = async (req, res) => {
 
 
 export const getAllBattles = async (req, res) => {
+  //use for battle card for getting all battles
+  //this to be used in diplaying battle card in explore battles
   try{
     const battles = await Battle.find()
     .populate('contestants.rapper1', 'username fullName email rank')

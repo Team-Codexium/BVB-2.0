@@ -38,6 +38,7 @@ export const BattleProvider = ({ children }) => {
 
   // Get battle by ID
   const getBattleById = async (battleId, token) => {
+    console.log("getBattleby id fucntion running in context");
     setLoading(true);
     setError(null);
     try {
@@ -45,6 +46,7 @@ export const BattleProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBattle(res.data.data);
+      console.log("getBattleById response:", res.data); 
       return res.data.data;
     } catch {
       setError('Failed to load battle.');
