@@ -214,8 +214,10 @@ export const acceptBattle = async (req, res) => {
     }
 
     // check if user is a contestant
+    // console.log(battle.contestants.rapper2._id.toString()) //686abcfb2f4bd372be0e86e0
+    // console.log(rapper2Id.toString()) //686abcfb2f4bd372be0e86e0
     
-    const isContestant = battle.contestants.rapper2.toString() === rapper2Id.toString();
+    const isContestant = battle.contestants.rapper2._id.toString() === rapper2Id.toString();
     if(!isContestant){
       return res.status(403).json({
         success:false,
@@ -354,6 +356,7 @@ export const handleTimeLimitExpiration = async (req, res) => {
     });
   }
 };
+
 export const getBattleById = async (req, res) => {
   //this controller to be used to get the battle deatils 
   //when some click on battle card 
@@ -392,8 +395,10 @@ export const getBattleByRapperId = async (req, res) => {
   try{
     const {rapperId} = req.params;
     const battles = await Battle.find({
-      'contestants.rapper1': rapperId
-    }).populate('contestants.rapper1', 'username fullName email rank')
+      $or: [
+        { 'contestants.rapper1': rapperId },
+        { 'contestants.rapper2': rapperId }
+      ]}).populate('contestants.rapper1', 'username fullName email rank')
     .populate('contestants.rapper2', 'username fullName email rank')
     .populate('winner', 'username fullName email rank');
 

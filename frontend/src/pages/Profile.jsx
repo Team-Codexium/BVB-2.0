@@ -29,7 +29,7 @@ const Profile = () => {
     // eslint-disable-next-line
   }, [user?._id, token]);
 
-  console.log(battles);
+  // console.log(battles);
 
   // Filter battles for stats and sections
   const userBattles = useMemo(() => {

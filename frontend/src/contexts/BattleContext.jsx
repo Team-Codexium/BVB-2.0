@@ -138,7 +138,7 @@ export const BattleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post(`${API_URL}/battles/accept/${battleId}`, {}, {
+      const res = await axios.put(`${API_URL}/battles/accept/${battleId}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBattle(res.data.data);

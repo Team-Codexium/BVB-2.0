@@ -21,7 +21,7 @@ export const sendEmail = async (to, subject, htmlContent) => {
   });
     if(!result) console.log("No result from nodemailer");
 
-  console.log("Email sent successfully:", result);
+  console.log("Email sent successfully:");
   return { success: true, message: "Email sent successfully" };
 
   }
