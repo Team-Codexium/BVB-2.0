@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import TrackList from '../components/TrackList';
 import BattleCard from '../components/BattleCard';
-import AudioUpload from '../components/audioUpload';
 import { Flame, Trophy, Swords, Crown, Star, Target, TrendingUp } from 'lucide-react';
 
 const Profile = () => {

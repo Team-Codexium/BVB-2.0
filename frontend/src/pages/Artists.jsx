@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useArtist } from '../contexts/ArtistContext';
-import UploadAudio from '../components/audioUpload'; // Assuming this is the audio upload component
 import { useBattle } from '../contexts/BattleContext';
 import { useAuth } from '../contexts/AuthContext';
 const PAGE_SIZE = 20;
