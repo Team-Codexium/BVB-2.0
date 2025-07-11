@@ -20,6 +20,11 @@ const battleSchema = new mongoose.Schema({
 
   rapper1_audio_urls:[
     {
+      title: {
+        type: String,
+        required: [true, 'Audio title for rapper1 is required'],
+        trim: true
+      },
       url: {
         type: String,
         required: [true, 'Audio URL for rapper1 is required']
@@ -30,6 +35,11 @@ const battleSchema = new mongoose.Schema({
   //array of url of audio coming from cloudinary of rapper2
   rapper2_audio_urls:[
     {
+      title: {
+        type: String,
+        required: [true, 'Audio title for rapper2 is required'],
+        trim: true
+      },
       url: {
         type: String,
         required: [true, 'Audio URL for rapper2 is required']

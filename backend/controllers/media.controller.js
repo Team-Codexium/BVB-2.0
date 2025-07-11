@@ -13,6 +13,9 @@ export const addAudioToBattle = async (req, res) => {
       verify the battle and rapperrr
     }*/
    const { battleId, rapperId } = req.params ;
+
+   const {title} = req.body;
+
     if (!battleId || !rapperId) {
       return res.status(400).json({
         success: false,
@@ -53,8 +56,8 @@ export const addAudioToBattle = async (req, res) => {
     console.log("audio uploaded to Cloudinary successfully");
     console.log(cloud_res);
 
-    if(israpper1) battle.rapper1_audio_urls.push({url:cloud_res.secure_url});
-    else battle.rapper2_audio_urls.push({url:cloud_res.secure_url});
+    if(israpper1) {battle.rapper1_audio_urls.push({title, url:cloud_res.secure_url});}
+    else battle.rapper2_audio_urls.push({title, url:cloud_res.secure_url});
     const updatedBattle = await battle.save();
       if(!updatedBattle)
       {
@@ -138,6 +141,7 @@ export const getAudioFromBattle=async(req,res)=>
     });
   }
 }
+
 export const deleteAudioFromBattle=async(req,res)=>
 {
     try

@@ -17,7 +17,7 @@ const Artists = () => {
   const [page, setPage] = useState(1);
 
   const { createBattle } = useBattle();
-  const {token} = useAuth();
+  const {token, user} = useAuth();
 
   useEffect(() => {
     // Filter artists by search
@@ -33,10 +33,12 @@ const Artists = () => {
     setPage(1); // Reset to first page on search
   }, [search, artists]);
 
+  const filteredRappers = filtered.filter(rapper => rapper._id != user._id)
+
   // Pagination
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  const totalPages = Math.ceil(filteredRappers.length / PAGE_SIZE) || 1;
   // console.log("Filtered", filtered)
-  const paginated = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = filteredRappers?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handlePrev = () => setPage(p => Math.max(1, p - 1));
   const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
@@ -53,7 +55,7 @@ const Artists = () => {
 
   return (
     <div className="bg-custom-gradient min-h-screen p-6">
-      <UploadAudio />
+      {/* <UploadAudio /> */}
       <div className="max-w-5xl mx-auto">
         <Card className="mb-6 bg-">
           <CardHeader>
@@ -66,7 +68,7 @@ const Artists = () => {
                 placeholder="Search by name or username..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full md:w-80 border-secondary"
+                className="w-full md:w-80 border-secondary text-white"
               />
             </div>
             {loading && (

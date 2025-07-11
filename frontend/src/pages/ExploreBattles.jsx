@@ -23,7 +23,7 @@ const STATUS_OPTIONS = [
 const PAGE_SIZE = 20;
 
 const ExploreBattles = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { battles, loading, error } = useBattle();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -31,20 +31,13 @@ const ExploreBattles = () => {
   const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const fetchBattles = async () => {
-  //     const params = {
-  //       limit: PAGE_SIZE,
-  //       page,
-  //       sort,
-  //     };
-  //     if (status) params.status = status;
-  //     // const res = await getQueryBattle(params, token);
-      
-  //     // setTotalPages(res?.totalPages || 1);
-  //   };
-  //   if (token) fetchBattles();
-  // }, [token, page, sort, status, getQueryBattle]);
+  const filteredBattles = battles.filter(battle => {
+    const rapper1Id = battle.contestants.rapper1._id;
+    const rapper2Id = battle.contestants.rapper2._id;
+
+    return rapper1Id != user._id && rapper2Id != user._id;
+  })
+
 
   const handleSortChange = (e) => {
     setSort(e.target.value);
@@ -105,11 +98,11 @@ const ExploreBattles = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            {!loading && !error && battles.length === 0 && (
+            {!loading && !error && filteredBattles.length === 0 && (
               <div className="text-center text-gray-400 py-8">No battles found.</div>
             )}
             <div className="grid gap-4 md:grid-cols-2">
-              {battles.map((battle) => (
+              {filteredBattles.map((battle) => (
                 <BattleCard battle={battle} />
               ))}
             </div>
