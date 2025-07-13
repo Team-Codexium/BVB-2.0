@@ -1,258 +1,143 @@
-"use client"
-
-
 import { useState, useRef, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Play, Pause, X, Volume2, VolumeX, SkipBack, SkipForward, Minimize2, Maximize2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Music, Upload, Plus, Trash2 } from "lucide-react"
 
-
-export default function MusicPlayer({ track, onClose }) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(0.7)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
-  const [position, setPosition] = useState({ x: 20, y: 20 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-
-  const audioRef = useRef(null)
-  const playerRef = useRef(null)
+const MusicPlayer = ({ track, onClose })  =>{
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1.0);
+  const [showVolume, setShowVolume] = useState(false);
 
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const updateTime = () => setCurrentTime(audio.currentTime)
-    const updateDuration = () => setDuration(audio.duration)
-
-    audio.addEventListener("timeupdate", updateTime)
-    audio.addEventListener("loadedmetadata", updateDuration)
-    audio.addEventListener("ended", () => setIsPlaying(false))
-
-    // Set initial volume
-    audio.volume = volume
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateTime)
-      audio.removeEventListener("loadedmetadata", updateDuration)
-      audio.removeEventListener("ended", () => setIsPlaying(false))
-    }
-  }, [volume])
-
-  const togglePlay = () => {
-    const audio = audioRef.current
-    if (!audio) return
-
     if (isPlaying) {
-      audio.pause()
+      audioRef.current?.play();
     } else {
-      audio.play()
+      audioRef.current?.pause();
     }
-    setIsPlaying(!isPlaying)
-  }
-
-  const handleSeek = (value) => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const newTime = value[0]
-    audio.currentTime = newTime
-    setCurrentTime(newTime)
-  }
-
-  const handleVolumeChange = (value) => {
-    const newVolume = value[0]
-    setVolume(newVolume)
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume
-    }
-    setIsMuted(newVolume === 0)
-  }
-
-  const toggleMute = () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    if (isMuted) {
-      audio.volume = volume
-      setIsMuted(false)
-    } else {
-      audio.volume = 0
-      setIsMuted(true)
-    }
-  }
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60)
-    const seconds = Math.floor(time % 60)
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`
-  }
-
-  const handleMouseDown = (e) => {
-    if (e.target === e.currentTarget || (e.target).closest(".drag-handle")) {
-      setIsDragging(true)
-      const rect = playerRef.current?.getBoundingClientRect()
-      if (rect) {
-        setDragOffset({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        })
-      }
-    }
-  }
+  }, [isPlaying, track.url]);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        })
-      }
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
     }
+  }, [volume]);
 
-    const handleMouseUp = () => {
-      setIsDragging(false)
-    }
+  const handleTimeUpdate = () => {
+    setProgress(audioRef.current.currentTime);
+  };
 
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove)
-      document.addEventListener("mouseup", handleMouseUp)
-    }
+  const handleLoadedMetadata = () => {
+    setDuration(audioRef.current.duration);
+  };
 
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-    }
-  }, [isDragging, dragOffset])
+  const handleSliderChange = (e) => {
+    const value = Number(e.target.value);
+    audioRef.current.currentTime = value;
+    setProgress(value);
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying((prev) => !prev);
+  };
+
+  const handleVolumeChange = (e) => {
+    setVolume(Number(e.target.value));
+  };
+
+  const formatTime = (secs) => {
+    if (isNaN(secs)) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Click outside to close volume popover
+  useEffect(() => {
+    if (!showVolume) return;
+    const handler = (e) => {
+      if (!e.target.closest('.volume-popover')) setShowVolume(false);
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [showVolume]);
 
   return (
-    <>
-      {/* Backdrop */}
-      <div className="fixed w-full inset-0 pointer-none:" />
-
-      {/* Floating Player */}
-      <div
-        ref={playerRef}
-        className={`fixed z-50 transition-all duration-300 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-        style={{
-          left: position.x,
-          top: position.y,
-          width: isMinimized ? "280px" : "400px",
-        }}
-        onMouseDown={handleMouseDown}
-      >
-        <Card className="bg-gray-900/95 border-purple-500/50 backdrop-blur-md shadow-2xl shadow-purple-500/20">
-          <CardHeader className="pb-2 drag-handle">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <span className="text-sm text-purple-400 font-medium">Now Playing</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-white"
-                >
-                  {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={onClose}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-white"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          {!isMinimized && (
-            <CardContent className="space-y-4">
-              {/* Track Info */}
-              <div className="text-center space-y-1">
-                <h3 className="text-white font-semibold text-lg">{track.title}</h3>
-                <p className="text-gray-400 text-sm">{track.artist}</p>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="space-y-2">
-                <Slider
-                  value={[currentTime]}
-                  max={duration || 100}
-                  step={1}
-                  onValueChange={handleSeek}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex items-center justify-center gap-4">
-                <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
-                  <SkipBack className="w-4 h-4" />
-                </Button>
-
-                <Button
-                  onClick={togglePlay}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 w-12 h-12 rounded-full"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                </Button>
-
-                <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
-                  <SkipForward className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {/* Volume Control */}
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="ghost" onClick={toggleMute} className="text-gray-400 hover:text-white p-1">
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </Button>
-                <Slider
-                  value={[isMuted ? 0 : volume]}
-                  max={1}
-                  step={0.1}
-                  onValueChange={handleVolumeChange}
-                  className="flex-1"
-                />
-              </div>
-            </CardContent>
-          )}
-
-          {isMinimized && (
-            <CardContent className="py-2">
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={togglePlay}
-                  size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 w-8 h-8 rounded-full p-0"
-                >
-                  {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 ml-0.5" />}
-                </Button>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{track.title}</p>
-                  <p className="text-gray-400 text-xs truncate">{track.artist}</p>
-                </div>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-
-        {/* Hidden Audio Element */}
-        <audio ref={audioRef} src={track.url} preload="metadata" />
+    <div className="bg-gray-900/80 rounded-lg p-3 shadow flex flex-col gap-1 relative">
+      {/* Title and playtime row */}
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-white font-medium truncate max-w-[60%]">{track.title}</span>
+        <span className="text-xs text-gray-300 font-mono">{formatTime(progress)} / {formatTime(duration)}</span>
       </div>
-    </>
-  )
+      {/* Controls row */}
+      <div className="flex items-center gap-2 w-full relative">
+        <button
+          onClick={handlePlayPause}
+          className="text-white bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center focus:outline-none"
+        >
+          {isPlaying ? (
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+          ) : (
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          )}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          value={progress}
+          onChange={handleSliderChange}
+          className="flex-1 accent-purple-500 mx-2"
+        />
+        {/* Volume icon and popover */}
+        <div className="relative flex items-center">
+          <button
+            onClick={() => setShowVolume((v) => !v)}
+            className="text-gray-300 hover:text-purple-400 focus:outline-none"
+            title="Volume"
+            type="button"
+          >
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+              <path d="M5 9v6h4l5 5V4l-5 5H5z" fill="currentColor"/>
+            </svg>
+          </button>
+          {showVolume && (
+            <div className="volume-popover absolute bottom-10 right-1 flex flex-col items-center z-50 p-2 bg-gray-800 rounded shadow-lg">
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={handleVolumeChange}
+                className="accent-purple-500"
+                style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical', height: 70 }}
+              />
+            </div>
+          )}
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-red-400 ml-2"
+          title="Close player"
+        >
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
+        <audio
+          ref={audioRef}
+          src={track.url}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={onClose}
+          style={{ display: "none" }}
+          autoPlay
+        />
+      </div>
+    </div>
+  );
 }
+
+export default MusicPlayer

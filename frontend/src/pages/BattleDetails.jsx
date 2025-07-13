@@ -19,8 +19,7 @@ export default function BattleDetails() {
   })
   const [userVote, setUserVote] = useState(null)
   const [battle, setBattle] = useState({})
-  const [currentTrack, setCurrentTrack] = useState(null)
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false)
+  const [loading, setLoading] = useState(false);
   const {battleId} = useParams();
   const battleStatus = "active";
 
@@ -29,10 +28,17 @@ export default function BattleDetails() {
 
   useEffect(() => {
     const getBattle = async(battleId, token) => {
-      const data = await getBattleById(battleId, token);
-      console.log("data",data)
-      if (data) {
-        setBattle(data);
+      try {
+        setLoading(true);
+        const data = await getBattleById(battleId, token);
+        console.log("data",data)
+        if (data) {
+          setBattle(data);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
       }
     }
     getBattle(battleId, token);
@@ -81,9 +87,10 @@ console.log(battle)
     formData.append("audio", file)
     formData.append("title", title)
     try {
-      await axios.post(`http://localhost:4000/api/media/${battleId}/${rapperId}/add-audio`, formData, {
+      const res = await axios.post(`http://localhost:4000/api/media/${battleId}/${rapperId}/add-audio`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
+      console.log(res)
       setAlertMsg("Track uploaded successfully!")
       // Re-fetch tracks
       const updatedBattle = await getBattleById(battleId, token);
@@ -100,18 +107,10 @@ console.log(battle)
     }))
   }
 
-  const handleTrackClick = (track, artist, rapperId, trackIndex, audioUrl) => {
-  setCurrentTrack({
-      title: track.title,
-      artist: artist,
-      url: audioUrl,
-    })
-    setIsPlayerOpen(true)
-  }
-
-  const closePlayer = () => {
-    setIsPlayerOpen(false)
-    setCurrentTrack(null)
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>;
   }
 
   
@@ -155,7 +154,6 @@ console.log(battle)
                 tracks={tracks.rapper1}
                 artist={rapper1?.fullName}
                 rapperId={rapper1?._id}
-                onTrackClick={handleTrackClick}
                 onTrackUpload={handleTrackUpload}
                 onTrackDelete={handleTrackDelete}
                 canUpload={user?._id === rapper1?._id} // Only contestants can upload
@@ -190,7 +188,6 @@ console.log(battle)
                 tracks={tracks.rapper2}
                 artist={rapper2?.fullName}
                 rapperId={rapper2?._id}
-                onTrackClick={handleTrackClick}
                 onTrackUpload={handleTrackUpload}
                 onTrackDelete={handleTrackDelete}
                 canUpload={user?._id === rapper2?._id} // Only contestants can upload
@@ -238,9 +235,6 @@ console.log(battle)
             </div>
           </CardContent>
         </Card>
-
-        {/* Music Player Modal */}
-        {isPlayerOpen && currentTrack && <MusicPlayer track={currentTrack} onClose={closePlayer} />}
       </div>
     </div>
   )

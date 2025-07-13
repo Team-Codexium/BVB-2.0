@@ -24,18 +24,27 @@ const PAGE_SIZE = 20;
 
 const ExploreBattles = () => {
   const { token, user } = useAuth();
-  const { battles, loading, error } = useBattle();
+  const { battles, getAllBattles, loading, error } = useBattle();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState('createdAt');
   const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const getBattles = async(token) => {
+      await getAllBattles(token);
+    }
+    getBattles(token);
+  }, [])
+
+  // console.table(battles)
+
   const filteredBattles = battles.filter(battle => {
     const rapper1Id = battle.contestants.rapper1._id;
     const rapper2Id = battle.contestants.rapper2._id;
 
-    return rapper1Id != user._id && rapper2Id != user._id;
+    return rapper1Id != user._id && rapper2Id != user._id && battle.status !== "pending";
   })
 
 
@@ -101,7 +110,7 @@ const ExploreBattles = () => {
             {!loading && !error && filteredBattles.length === 0 && (
               <div className="text-center text-gray-400 py-8">No battles found.</div>
             )}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col flex-wrap gap-5">
               {filteredBattles.map((battle) => (
                 <BattleCard battle={battle} />
               ))}

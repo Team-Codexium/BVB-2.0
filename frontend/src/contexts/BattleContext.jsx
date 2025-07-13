@@ -169,11 +169,6 @@ export const BattleProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    getAllBattles();
-    console.log(battles)
-  },[])
-
   const value = {
     battles,
     battle,
