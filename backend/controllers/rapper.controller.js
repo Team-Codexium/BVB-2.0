@@ -1,5 +1,6 @@
 import { Rapper } from "../models/rapper.model.js";
 import { Battle } from "../models/battle.model.js";
+
 // Get all rappers (with pagination and search)
 export const getAllRappers = async (req, res) => {
   try {

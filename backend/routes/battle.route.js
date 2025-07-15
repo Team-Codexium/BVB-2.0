@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyRapperJWT } from "../middlewares/JWTAuth.middleware.js";
-import { acceptBattle, createBattle, getAllBattles, getBattleById, getBattleByRapperId, getBattleByStatus, getQueryBattle, handleTimeLimitExpiration } from "../controllers/battle.controller.js";
+import { acceptBattle, createBattle, getAllBattles, getBattleById, getBattleByRapperId, getBattleByStatus, getQueryBattle } from "../controllers/battle.controller.js";
 
 const router = Router();
 
@@ -11,6 +11,5 @@ router.route("/rapper/:rapperId").get(verifyRapperJWT,getBattleByRapperId);
 router.route("/").get(getAllBattles);
 router.route("/status/:status").get(verifyRapperJWT, getBattleByStatus);
 router.route("/query").post(verifyRapperJWT, getQueryBattle)
-router.route("/expire/:battleId").post(verifyRapperJWT, handleTimeLimitExpiration);
 
 export default router 

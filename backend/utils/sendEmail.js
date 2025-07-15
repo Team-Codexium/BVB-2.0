@@ -4,7 +4,7 @@ export const sendEmail = async (to, subject, htmlContent) => {
 
   try
   {
-    console.log("Sending email function startss");
+    console.log("Sending email function starts");
       const transporter = nodemailer.createTransport({
     service: 'gmail', 
     auth: {

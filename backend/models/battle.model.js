@@ -111,7 +111,6 @@ const battleSchema = new mongoose.Schema({
   // if active then it must be true , else no need 
   endTime: {
     type: Date,
-    
   }
 }, {
   timestamps: true

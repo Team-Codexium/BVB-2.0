@@ -1,5 +1,5 @@
 import { EmailVerification } from '../models/emailVerification.model.js';
-import { sendEmail } from '../sendemail.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 // Generate a random 6-digit OTP
 const generateOTP = () => {

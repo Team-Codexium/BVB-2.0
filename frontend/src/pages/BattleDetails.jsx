@@ -31,7 +31,7 @@ export default function BattleDetails() {
       try {
         setLoading(true);
         const data = await getBattleById(battleId, token);
-        console.log("data",data)
+        // console.log("data",data)
         if (data) {
           setBattle(data);
         }

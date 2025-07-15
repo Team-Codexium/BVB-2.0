@@ -1,6 +1,7 @@
 import {Battle} from '../models/battle.model.js'
 import { Rapper } from '../models/rapper.model.js'
-import { sendEmail } from '../sendemail.js';
+import { sendEmail } from '../utils/sendEmail.js';
+
 
 export const createBattle = async ( req,res) =>{
     try{
@@ -272,90 +273,7 @@ export const acceptBattle = async (req, res) => {
   }
 }
 //handletime limit expiration
-// this function will be called when the time limit of the battle is over
-export const handleTimeLimitExpiration = async (req, res) => {
-  try {
-    const { battleId } = req.params;
-    
-    // Find the battle
-    const battle = await Battle.findById(battleId);
-    
-    if (!battle) {
-      return res.status(404).json({
-        success: false,
-        message: 'Battle not found'
-      });
-    }
 
-    // Check if battle is active
-    if (battle.status !== 'active') {
-      return res.status(400).json({
-        success: false,
-        message: 'Battle is not active'
-      });
-    }
-
-    // Calculate if time limit has expired
-    const battleStartTime = new Date(battle.battleDate);
-    const currentTime = new Date();
-    const timeElapsed = (currentTime - battleStartTime) / 1000; // Convert to seconds
-
-    if (timeElapsed < battle.timeLimit) {
-      return res.status(400).json({
-        success: false,
-        message: 'Time limit has not expired yet',
-        remainingTime: battle.timeLimit - timeElapsed
-      });
-    }
-
-    // Determine winner based on submissions
-    let winner = null;
-    const rapper1Submission = battle.verses.rapper1.text && battle.verses.rapper1.audio;
-    const rapper2Submission = battle.verses.rapper2.text && battle.verses.rapper2.audio;
-
-    if (rapper1Submission && !rapper2Submission) {
-      winner = battle.contestants.rapper1;
-    } else if (!rapper1Submission && rapper2Submission) {
-      winner = battle.contestants.rapper2;
-    } else if (!rapper1Submission && !rapper2Submission) {
-      winner = 'draw'; // Both failed to submit
-    }
-    // If both submitted, winner will be determined by voting/judging system
-    // You can add additional logic here for judging criteria
-
-    // Update battle status and handle incomplete submissions
-    const updatedBattle = await Battle.findByIdAndUpdate(
-      battleId,
-      {
-        status: 'completed',
-        winner: winner,
-        $set: {
-          'verses.rapper1.text': battle.verses.rapper1.text || 'No submission',
-          'verses.rapper2.text': battle.verses.rapper2.text || 'No submission',
-          'verses.rapper1.audio': battle.verses.rapper1.audio || '',
-          'verses.rapper2.audio': battle.verses.rapper2.audio || '',
-          endTime: currentTime
-        }
-      },
-      { new: true }
-    ).populate('contestants.rapper1', 'username fullName email rank')
-     .populate('contestants.rapper2', 'username fullName email rank')
-     .populate('winner', 'username fullName email rank');
-
-    return res.status(200).json({
-      success: true,
-      message: 'Battle time limit expired and status updated',
-      data: updatedBattle
-    });
-
-  } catch (error) {
-    console.error('Error handling time limit expiration:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while handling time limit expiration'
-    });
-  }
-};
 
 export const getBattleById = async (req, res) => {
   //this controller to be used to get the battle deatils 
