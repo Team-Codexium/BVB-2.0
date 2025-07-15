@@ -3,6 +3,7 @@ import cron from 'node-cron'
 
 async function checkAndCompleteExpiredBattles() {
   const now = new Date();
+  console.log(now);
   const activeBattles = await Battle.find({ status: 'active' });
   for (const battle of activeBattles) {
     const start = battle.battleDate || battle.createdAt;
@@ -24,4 +25,4 @@ async function checkAndCompleteExpiredBattles() {
   }
 }
 
-cron.schedule('*/1 * * * *', checkAndCompleteExpiredBattles);
+cron.schedule('*/10 * * * *', checkAndCompleteExpiredBattles);

@@ -2,7 +2,8 @@ import mongoose from 'mongoose'
 
 const battleSchema = new mongoose.Schema({
 
-// Storing contestants refernce 
+// Storing contestants refernce
+    
     contestants: {
     rapper1: {
       type: mongoose.Schema.Types.ObjectId,
@@ -46,6 +47,10 @@ const battleSchema = new mongoose.Schema({
       },
     }
   ],
+  title:{
+      type:String,
+     
+    },
   // Store votes of individual rappers
   voting: {
     rapper1Votes: {
@@ -82,18 +87,10 @@ const battleSchema = new mongoose.Schema({
     ref: 'Rapper',
     default: null
   },
-
-  battleDate: {
-    type: Date,
-    default: Date.now
-  },
-
-  
   timeLimit: {
-    type: Number, // Time limit in minutes
+    type: Date, // Time limit in minutes
     required: [true, 'Time limit is required'],
-    min: [30, 'Time limit must be at least 1 minute'],
-    max: [10080, 'Time limit cannot exceed 7 days (10080 minutes)']
+    
   },
 
   /*

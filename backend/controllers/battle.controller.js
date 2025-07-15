@@ -5,11 +5,20 @@ import { sendEmail } from '../utils/sendEmail.js';
 
 export const createBattle = async ( req,res) =>{
     try{
-        const {rapper2Id,battleDate} = req.body;
+        const {rapper2Id,battleTitle,timeLimit} = req.body;
+       // console.log(rapper2Id,battleTitle,timeLimit)
         const rapper1Id = req.rapper._id;
+        console.log(req.rapper);
+        //console.log(rapper1Id); 
          // to be check based on authentication
         // Validation if rapper 2 is not present
-        const timeLimit = 1440; // 1 day
+       if (!req.rapper || !req.rapper._id) {
+  console.log("req.rapper is undefined or invalid");
+  return res.status(401).json({
+    success: false,
+    message: 'Unauthorized. Please log in again.'
+  });
+}
         if(!rapper2Id) {
             return res.status(400).json({
                 success:false,
@@ -95,9 +104,11 @@ export const createBattle = async ( req,res) =>{
           text: ''
         }
       },
-      timeLimit: timeLimit,
-      battleDate: battleDate || new Date(),
-      status: 'pending'
+      
+      title:battleTitle,
+      timeLimit:timeLimit,
+      status: 'pending',
+   
     });
 
     // Save battle to database
