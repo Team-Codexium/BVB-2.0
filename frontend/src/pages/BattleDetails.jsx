@@ -1,130 +1,135 @@
 import { useState, useEffect } from "react"
-import VotingComponent from "../components/VotePanel"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { User, Music, Calendar } from "lucide-react"
-import MusicPlayer from "../components/MusicPlayer"
+import { Calendar } from "lucide-react"
 import { useParams } from "react-router-dom"
-
-import {useBattle} from "../contexts/BattleContext"
-import {useAuth} from "../contexts/AuthContext"
+import { useBattle } from "../contexts/BattleContext"
+import { useAuth } from "../contexts/AuthContext"
 import TrackList from "../components/TrackList"
 import axios from "axios"
 import { Alert } from "@/components/ui/alert"
+import VotingComponent from "../components/VotePanel"
+import { Progress } from "@/components/ui/progress"
 
 export default function BattleDetails() {
-  const [votes, setVotes] = useState({
-    rapper1: 42,
-    rapper2: 38,
-  })
-  const [userVote, setUserVote] = useState(null)
-  const [battle, setBattle] = useState({})
-  const [loading, setLoading] = useState(false);
-  const {battleId} = useParams();
-  const battleStatus = "active";
-
-  const {getBattleById} = useBattle();
-  const {token, user} = useAuth();
-
-  useEffect(() => {
-    const getBattle = async(battleId, token) => {
-      try {
-        setLoading(true);
-        const data = await getBattleById(battleId, token);
-        console.log("data",data)
-        if (data) {
-          setBattle(data);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getBattle(battleId, token);
-    
-  }, [battleId])
-
-  // console.log(battle)
-  const rapper1 = battle?.contestants?.rapper1;
-  const rapper2 = battle?.contestants?.rapper2;
-  // console.log("Rapper1", rapper1)
-  // console.log("Rapper2", rapper2)
-  // console.log("User", user)
-
-  const [tracks, setTracks] = useState({
-    rapper1: [],
-    rapper2: [],
-  })
+  const [loading, setLoading] = useState(false)
   const [alertMsg, setAlertMsg] = useState("")
+  const [userVote, setUserVote] = useState(null)
+  const [progress, setProgress] = useState(0)
+  const [timeRemaining, setTimeRemaining] = useState("")
 
-  // Fetch tracks for a rapper from the server
-  
-console.log(battle)
-  // Fetch tracks when battle or rappers change
-  useEffect(() => {
-    setTracks({
-      rapper1: battle.rapper1_audio_urls || [],
-      rapper2: battle.rapper2_audio_urls || [],
-    });
-    // eslint-disable-next-line
-  }, [battleId, rapper1?._id, rapper2?._id])
+  const { battleId } = useParams()
+  const { getBattleById, battle } = useBattle()
+  const { token, user } = useAuth()
 
-  const handleVote = (rapperId) => {
-    if (!userVote) {
-      setUserVote(rapperId)
-      setVotes((prev) => ({
-        ...prev,
-        [rapperId]: prev[rapperId] + 1,
-      }))
+  const refreshBattle = () => {
+    getBattleById(battleId, token)
+  }
+
+  // Function to calculate time remaining
+  const calculateTimeRemaining = (endTime) => {
+    const now = new Date().getTime()
+    const end = new Date(endTime).getTime()
+    const timeDiff = end - now
+
+    if (timeDiff <= 0) {
+      return "Battle has ended"
+    }
+
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
+
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} and ${hours} hr${hours > 1 ? 's' : ''} remains`
+    } else if (hours > 0) {
+      return `${hours} hr${hours > 1 ? 's' : ''} and ${minutes} min${minutes > 1 ? 's' : ''} remains`
+    } else {
+      return `${minutes} min${minutes > 1 ? 's' : ''} remains`
     }
   }
 
-  // Upload handler for TrackList
+  useEffect(() => {
+    refreshBattle()
+  }, [battleId, token])
+
+  useEffect(() => {
+    if (battle?.timeLimit) {
+      const updateTimeAndProgress = () => {
+        const now = new Date().getTime()
+        const end = new Date(battle.timeLimit).getTime()
+        const created = new Date(battle.createdAt).getTime()
+        
+        // Calculate progress
+        const percent = Math.max(0, Math.min(100, ((now - created) / (end - created)) * 100))
+        setProgress(percent)
+        
+        // Calculate time remaining
+        const remaining = calculateTimeRemaining(battle.timeLimit)
+        setTimeRemaining(remaining)
+      }
+
+      // Update immediately
+      updateTimeAndProgress()
+      
+      // Update every minute
+      const interval = setInterval(updateTimeAndProgress, 60000)
+
+      return () => clearInterval(interval)
+    }
+  }, [battle?.timeLimit, battle?.createdAt])
+
+  const rapper1 = battle?.contestants?.rapper1
+  const rapper2 = battle?.contestants?.rapper2
+  const votes = {
+    rapper1: battle?.voting?.rapper1Votes || 0,
+    rapper2: battle?.voting?.rapper2Votes || 0,
+  }
+
+  const totalVotes = votes.rapper1 + votes.rapper2
+  const rapper1Percent = totalVotes === 0 ? 50 : (votes.rapper1 / totalVotes) * 100
+  const battleStatus = battle?.status
+
   const handleTrackUpload = async (rapperId, file, title) => {
     if (!battleId || !rapperId || !file) return
     const formData = new FormData()
     formData.append("audio", file)
     formData.append("title", title)
+
     try {
-      const res = await axios.post(`http://localhost:4000/api/media/${battleId}/${rapperId}/add-audio`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      console.log(res)
+      await axios.post(
+        `http://localhost:4000/api/media/${battleId}/${rapperId}/add-audio`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      )
       setAlertMsg("Track uploaded successfully!")
-      // Re-fetch tracks
-      const updatedBattle = await getBattleById(battleId, token);
-      setBattle(updatedBattle);
+      refreshBattle()
     } catch {
       setAlertMsg("Failed to upload track.")
     }
   }
 
-  const handleTrackDelete = (rapperId, trackIndex) => {
-    setTracks((prev) => ({
-      ...prev,
-      [rapperId]: prev[rapperId].filter((_, i) => i !== trackIndex),
-    }))
+  if (loading || !battle?.contestants) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>;
-  }
-
-  
-
-  return battle && (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-pink-900/20 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {alertMsg && (
-          <Alert className="mb-4" onClick={() => setAlertMsg("")}>{alertMsg}</Alert>
+          <Alert className="mb-4" onClick={() => setAlertMsg("")}>
+            {alertMsg}
+          </Alert>
         )}
+
         {/* Battle Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            RAP BATTLE ARENA
+            {battle?.title}
           </h1>
           <div className="flex items-center justify-center gap-4">
             <Badge variant="outline" className="border-purple-500 text-purple-400">
@@ -132,8 +137,16 @@ console.log(battle)
               Live Battle
             </Badge>
             <Badge variant="outline" className="border-pink-500 text-pink-400">
-              Status: {battleStatus}
+              Status: {battle?.status}
             </Badge>
+          </div>
+          <div className="flex flex-col items-center space-y-2">
+            <Progress value={progress} className="w-[60%] bg-red-950"
+            style={{'--progress-foreground': '#fffff'}} 
+            />
+            <div className=" font-medium text-sm">
+              {timeRemaining}
+            </div>
           </div>
         </div>
 
@@ -142,33 +155,31 @@ console.log(battle)
           {/* Rapper 1 Card */}
           <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full mx-auto flex items-center justify-center mb-4">
-                <img src={rapper1?.image} alt="" />
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full mx-auto mb-4 overflow-hidden">
+                <img src={rapper1?.image} alt="" className="object-cover w-full h-full" />
               </div>
-              <CardTitle className="text-white text-xl">{rapper1?.fullName}</CardTitle>
+              <CardTitle className="text-white text-xl">{rapper1?.username}</CardTitle>
               <p className="text-gray-400">The Lightning Lyricist</p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Track List for Rapper 1 */}
               <TrackList
-                tracks={tracks.rapper1}
-                artist={rapper1?.fullName}
+                tracks={battle?.rapper1_audio_urls}
+                artist={rapper1?.username}
                 rapperId={rapper1?._id}
                 onTrackUpload={handleTrackUpload}
-                onTrackDelete={handleTrackDelete}
-                canUpload={user?._id === rapper1?._id} // Only contestants can upload
+                onTrackDelete={() => {}}
+                canUpload={user?._id === rapper1?._id}
               />
 
-              {/* Voting Component */}
               <VotingComponent
-                rapperId="rapper1"
-                rapperName="MC Thunder"
+                rapperId={rapper1?._id}
+                rapperName={rapper1?.username}
                 currentVotes={votes.rapper1}
                 hasVoted={userVote !== null}
-                votedForThisRapper={userVote === "rapper1"}
+                votedForThisRapper={userVote === rapper1?._id}
                 isContestant={user?._id === rapper1?._id}
                 battleStatus={battleStatus}
-                onVote={handleVote}
+                onVote={() => setUserVote(rapper1?._id)}
               />
             </CardContent>
           </Card>
@@ -176,33 +187,31 @@ console.log(battle)
           {/* Rapper 2 Card */}
           <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-pink-600 to-pink-800 rounded-full mx-auto flex items-center justify-center mb-4">
-                <img src={rapper2?.image} alt="" />
+              <div className="w-20 h-20 bg-gradient-to-r from-pink-600 to-pink-800 rounded-full mx-auto mb-4 overflow-hidden">
+                <img src={rapper2?.image} alt="" className="object-cover w-full h-full" />
               </div>
-              <CardTitle className="text-white text-xl">{rapper2?.fullName}</CardTitle>
+              <CardTitle className="text-white text-xl">{rapper2?.username}</CardTitle>
               <p className="text-gray-400">Fire on the Mic</p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Track List for Rapper 2 */}
               <TrackList
-                tracks={tracks.rapper2}
-                artist={rapper2?.fullName}
+                tracks={battle?.rapper2_audio_urls}
+                artist={rapper2?.username}
                 rapperId={rapper2?._id}
                 onTrackUpload={handleTrackUpload}
-                onTrackDelete={handleTrackDelete}
-                canUpload={user?._id === rapper2?._id} // Only contestants can upload
+                onTrackDelete={() => {}}
+                canUpload={user?._id === rapper2?._id}
               />
 
-              {/* Voting Component */}
               <VotingComponent
-                rapperId="rapper2"
-                rapperName="Blaze Master"
+                rapperId={rapper2?._id}
+                rapperName={rapper2?.username}
                 currentVotes={votes.rapper2}
                 hasVoted={userVote !== null}
-                votedForThisRapper={userVote === "rapper2"}
+                votedForThisRapper={userVote === rapper2?._id}
                 isContestant={user?._id === rapper2?._id}
                 battleStatus={battleStatus}
-                onVote={handleVote}
+                onVote={() => setUserVote(rapper2?._id)}
               />
             </CardContent>
           </Card>
@@ -216,20 +225,18 @@ console.log(battle)
               <div className="flex justify-center items-center gap-8">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-400">{votes.rapper1}</div>
-                  <div className="text-sm text-gray-400">MC Thunder</div>
+                  <div className="text-sm text-gray-400">{rapper1?.username}</div>
                 </div>
                 <div className="text-gray-500 text-xl">VS</div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-pink-400">{votes.rapper2}</div>
-                  <div className="text-sm text-gray-400">Blaze Master</div>
+                  <div className="text-sm text-gray-400">{rapper2?.username}</div>
                 </div>
               </div>
               <div className="w-full bg-gray-800 rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(votes.rapper1 / (votes.rapper1 + votes.rapper2)) * 100}%`,
-                  }}
+                  style={{ width: `${rapper1Percent}%` }}
                 ></div>
               </div>
             </div>

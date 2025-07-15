@@ -43,7 +43,7 @@ const BattleCard = ({ battle }) => {
                 onClick={() => navigate(`/dashboard/battle/${battle._id}`)}
             >
                 <CardHeader className="flex flex-row items-center justify-between">
-                    {/* <CardTitle className="text-lg w-full text-center">{battle.title || 'Untitled Battle'}</CardTitle> */}
+                    <CardTitle className="text-lg w-full text-center">{battle.title || 'Untitled Battle'}</CardTitle>
                     <div>
                         <Badge
                             variant="outline"
@@ -81,6 +81,7 @@ const BattleCard = ({ battle }) => {
                             </div>
                         </div>
                         {/* VS */}
+                      
                         <div className="mx-2 text-2xl font-bold text-secondary">VS</div>
                         {/* Rapper 2 */}
                         <div className={`flex gap-5 justify-center items-center flex-1 ${leading === 'r2' ? 'bg-secondary/30 rounded-lg p-2' : ''}`}>
