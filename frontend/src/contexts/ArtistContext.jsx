@@ -22,7 +22,7 @@ export const ArtistProvider = ({ children }) => {
     setError(null);
     try {
       const res = await axios.get(`${API_URL}/api/rappers`);
-      // console.log("res", res)
+      console.log("res", res)
       setArtists(res.data.data);
     } catch {
       setError('Failed to load artists.');

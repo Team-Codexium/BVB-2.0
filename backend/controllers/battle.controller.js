@@ -6,7 +6,8 @@ import { sendEmail } from '../utils/sendEmail.js';
 export const createBattle = async ( req,res) =>{
     try{
         const {rapper2Id,battleTitle,timeLimit} = req.body;
-       // console.log(rapper2Id,battleTitle,timeLimit)
+       console.log(rapper2Id,battleTitle,timeLimit)
+       console.log("create battle controller ")
         const rapper1Id = req.rapper._id;
         console.log(req.rapper);
         //console.log(rapper1Id); 
@@ -94,17 +95,8 @@ export const createBattle = async ( req,res) =>{
         rapper1: rapper1Id,
         rapper2: rapper2Id
       },
-      verses: {
-        rapper1: {
-          audio: '', // Will be filled when rapper submits
-          text: ''
-        },
-        rapper2: {
-          audio: '', // Will be filled when rapper submits
-          text: ''
-        }
-      },
-      
+      rapper1_audio_urls: [],
+      rapper2_audio_urls: [],
       title:battleTitle,
       timeLimit:timeLimit,
       status: 'pending',

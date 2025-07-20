@@ -49,7 +49,7 @@ const battleSchema = new mongoose.Schema({
   ],
   title:{
       type:String,
-     
+      required: true,
     },
   // Store votes of individual rappers
   voting: {

@@ -5,16 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-  SheetClose,
-
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { AlertCircle } from "lucide-react";
@@ -30,9 +29,8 @@ const Artists = () => {
   const [filtered, setFiltered] = useState([]);
   const [page, setPage] = useState(1);
 
-  const [title,setTitle]=useState("");
-  const [duration,setDuration]=useState(1);
-  
+  const [title, setTitle] = useState("");
+  const [duration, setDuration] = useState(160);
 
   const { createBattle } = useBattle();
   const { token, user } = useAuth();
@@ -71,9 +69,8 @@ const Artists = () => {
     // console.log("Challenge", artistId)
     const data = {
       rapper2Id: artistId,
-      battleTitle:title,
-      timeLimit:duration
-
+      battleTitle: title,
+      timeLimit: duration,
     };
     await createBattle(data, token);
   };
@@ -141,45 +138,74 @@ const Artists = () => {
                         {artist.rank || "N/A"}
                       </div>
                     </div>
-                        <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="bg-red-600">Challenge</Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Creating you Challenge Request</SheetTitle>
-          <SheetDescription>
-           write the title of battle you want and give the time of expiry of this battle
-          </SheetDescription>
-        </SheetHeader>
-        <div className="grid flex-1 auto-rows-min gap-6 px-4">
-          <div className="grid gap-3">
-            <Label htmlFor="sheet-demo-name">Battle-title</Label>
-            <Input id="sheet-demo-name" 
-              value={title}
-              onChange={(e)=>setTitle(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="sheet-demo-username">date</Label>
-            <Input id="sheet-demo-username" 
-             type="datetime-local"
-            
-              value={duration}
-              onChange={(e)=>setDuration(e.target.value)}
-            />
-          </div>
+
+                    <Dialog>
+  <form>
+    <DialogTrigger asChild>
+      <Button
+        variant="outline"
+        className="bg-red-600 hover:bg-red-500"
+      >
+        Open Dialog
+      </Button>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-red-900 text-white border border-primary shadow-lg">
+      <DialogHeader>
+        <DialogTitle>Create Battle</DialogTitle>
+        <DialogDescription>
+          Set title and time for this battle. Click Create when you're ready.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="grid gap-4">
+        {/* Battle Title Input */}
+        <div className="grid gap-2">
+          <Label htmlFor="battle-title">Battle Title</Label>
+          <Input
+            id="battle-title"
+            name="battleTitle"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter battle title"
+          />
         </div>
-        <SheetFooter>
-         <SheetClose asChild>
-  <Button onClick={handleChallenge}>Submit</Button>
-</SheetClose>
-          <SheetClose asChild>
-            <Button variant="outline" >Close</Button>
-          </SheetClose>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+
+        {/* Time Limit Selector */}
+        <div className="grid gap-2 ">
+          <Label htmlFor="time-limit">Time Limit (minutes)</Label>
+          <select
+            id="time-limit"
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value))}
+            className="bg-red-900 text-white border border-secondary rounded px-3 py-2"
+          >
+            {[1, 5, 7, 10, 15].map((val) => (
+              <option key={val} value={val}>
+                {val} minutes
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button variant="outline" className="bg-red-600 hover:bg-red-500"  >Cancel</Button>
+        </DialogClose>
+        <DialogClose asChild>
+          <Button
+            type="button"
+            className="bg-red-600 hover:bg-red-500"
+            onClick={() => handleChallenge(artist._id)}
+          >
+            Create Battle
+          </Button>
+        </DialogClose>
+      </DialogFooter>
+    </DialogContent>
+  </form>
+</Dialog>
+
                   </CardContent>
                 </Card>
               ))}
