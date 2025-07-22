@@ -32,8 +32,8 @@ export const addAudioToBattle = async (req, res) => {
         }
       )
     }
-    const israpper1=battle.contestants.rapper1.toString()===rapperId;
-    const israpper2=battle.contestants.rapper2.toString()===rapperId;
+    const israpper1=battle.rapper1.toString()===rapperId;
+    const israpper2=battle.rapper2.toString()===rapperId;
 
     if(!israpper1 && !israpper2)
     {
@@ -56,8 +56,8 @@ export const addAudioToBattle = async (req, res) => {
     console.log("audio uploaded to Cloudinary successfully");
     console.log(cloud_res);
 
-    if(israpper1) {battle.rapper1_audio_urls.push({title, url:cloud_res.secure_url});}
-    else battle.rapper2_audio_urls.push({title, url:cloud_res.secure_url});
+    if(israpper1) {battle.rapper1Tracks.push({title, url:cloud_res.secure_url});}
+    else battle.rapper2Tracks.push({title, url:cloud_res.secure_url});
     const updatedBattle = await battle.save();
       if(!updatedBattle)
       {
@@ -109,8 +109,8 @@ export const getAudioFromBattle=async(req,res)=>
         }
       )
     } 
-    const israpper1=battle.contestants.rapper1.toString()===rapperId;
-    const israpper2=battle.contestants.rapper2.toString()===rapperId;
+    const israpper1=battle.rapper1.toString()===rapperId;
+    const israpper2=battle.rapper2.toString()===rapperId;
     if(!israpper1 && !israpper2)
     {
       return res.status(400).json(
@@ -122,8 +122,8 @@ export const getAudioFromBattle=async(req,res)=>
     }
    
     let audioUrls = [];
-    if(israpper1) audioUrls = battle.rapper1_audio_urls;
-    else audioUrls = battle.rapper2_audio_urls;
+    if(israpper1) audioUrls = battle.rapper1Tracks;
+    else audioUrls = battle.rapper2Tracks;
 
       res.status(201).json(
         {
@@ -162,8 +162,8 @@ export const deleteAudioFromBattle=async(req,res)=>
           });
         }
 
-        const isRapper1 = battle.contestants.rapper1.toString() === rapperId;
-        const isRapper2 = battle.contestants.rapper2.toString() === rapperId;
+        const isRapper1 = battle.rapper1.toString() === rapperId;
+        const isRapper2 = battle.rapper2.toString() === rapperId;
 
         if (!isRapper1 && !isRapper2) {
           return res.status(400).json({
@@ -172,8 +172,8 @@ export const deleteAudioFromBattle=async(req,res)=>
           });
         }
         let audioUrls = [];
-        if (isRapper1) audioUrls = battle.rapper1_audio_urls;
-        else audioUrls = battle.rapper2_audio_urls;
+        if (isRapper1) audioUrls = battle.rapper1Tracks;
+        else audioUrls = battle.rapper2Tracks;
 
         if (index < 0 || index >= audioUrls.length) {
           return res.status(400).json({
@@ -184,8 +184,8 @@ export const deleteAudioFromBattle=async(req,res)=>
 
         audioUrls.splice(index, 1);
 
-        if(isRapper1) battle.rapper1_audio_urls = audioUrls;
-        else battle.rapper2_audio_urls = audioUrls;
+        if(isRapper1) battle.rapper1Tracks = audioUrls;
+        else battle.rapper2Tracks = audioUrls;
 
        const  battleres= battle.save()
       if(!battleres)

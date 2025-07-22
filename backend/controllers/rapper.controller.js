@@ -135,12 +135,12 @@ export const getLoggedInRapperProfile = async (req, res) => {
     // Get all battles where this rapper is a participant
     const battles = await Battle.find({
       $or: [
-        { "contestants.rapper1": rapperId },
-        { "contestants.rapper2": rapperId },
+        { "rapper1": rapperId },
+        { "rapper2": rapperId },
       ],
     })
-      .populate("contestants.rapper1", "username image fullName rank")
-      .populate("contestants.rapper2", "username image fullName rank")
+      .populate("rapper1", "username image fullName rank")
+      .populate("rapper2", "username image fullName rank")
       .populate("winner", "username image")
       .populate("voting.voters.user", "username image")
       .sort({ createdAt: -1 });
@@ -156,8 +156,8 @@ export const getLoggedInRapperProfile = async (req, res) => {
     };
 
     battles.forEach((battle) => {
-      const isRapper1 = battle.contestants.rapper1._id.toString() === rapperId;
-      const isRapper2 = battle.contestants.rapper2._id.toString() === rapperId;
+      const isRapper1 = battle.rapper1._id.toString() === rapperId;
+      const isRapper2 = battle.rapper2._id.toString() === rapperId;
 
       switch (battle.status) {
         case "pending":
@@ -295,8 +295,8 @@ export const getRapperProfile = async (req, res) => {
     };
 
     battles.forEach((battle) => {
-      const isRapper1 = battle.contestants.rapper1._id.toString() === rapperId;
-      const isRapper2 = battle.contestants.rapper2._id.toString() === rapperId;
+      const isRapper1 = battle.rapper1._id.toString() === rapperId;
+      const isRapper2 = battle.rapper2._id.toString() === rapperId;
 
       switch (battle.status) {
         case "pending":
