@@ -8,12 +8,16 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import TrackList from '../components/TrackList';
 import BattleCard from '../components/BattleCard';
-import { Flame, Trophy, Swords, Crown, Star, Target, TrendingUp } from 'lucide-react';
+import { Flame, Trophy, Swords, Crown, Star, Target, TrendingUp, Pencil } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import UpdateProfile from '../components/UpdateProfile';
 
 const Profile = () => {
-  const { user, token } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const { battles, loading, getBattleByRapperId } = useBattle();
   const [localLoading, setLocalLoading] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
 
   // Fetch user's battles on mount
   useEffect(() => {
@@ -27,8 +31,6 @@ const Profile = () => {
     fetch();
     // eslint-disable-next-line
   }, [user?._id, token]);
-
-  // console.log(battles);
 
   // Filter battles for stats and sections
   const userBattles = useMemo(() => {
@@ -54,7 +56,7 @@ const Profile = () => {
     const vB = (b.voting?.rapper1Votes || 0) + (b.voting?.rapper2Votes || 0);
     return vB - vA;
   }).slice(0, 3);
-  
+
   // Current battle (first active) Sorting based on status
   const currentBattle = userBattles.find(b => b.status === 'active' || b.status === 'started');
 
@@ -80,33 +82,59 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-custom-gradient py-10 px-2 md:px-4">
-      <div className="max-w-4xl mx-auto flex flex-col items-center">
-        {/* Profile Picture */}
-        <Avatar className="w-32 h-32 mb-4 shadow-lg border-4 border-secondary">
-          <AvatarImage src={user.image || '/default-avatar.png'} alt={user.fullName || user.username || 'User'} />
-          <AvatarFallback>{(user.username || user.fullName || '?')[0]}</AvatarFallback>
-        </Avatar>
-        {/* Basic Info */}
-        <div className="text-center mb-6">
-          <div className="text-3xl font-bold text-secondary dark:text-white">{user.fullName || user.username}</div>
-          <div className="text-md text-gray-300 mb-1">@{user.username}</div>
-          {/* <Badge variant="secondary" className="mb-2">Rank: {user.rank ?? 'N/A'}</Badge> */}
-          {/* <div className="text-sm text-gray-400">{user.email}</div> */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-pink-900 relative overflow-hidden py-10 px-2 md:px-4">
+      {/* Blurred neon shapes */}
+      <div className="absolute top-[-80px] left-[-120px] w-[300px] h-[300px] bg-pink-600 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute bottom-[-60px] right-0 w-[200px] h-[200px] bg-yellow-400 rounded-full blur-3xl opacity-20"></div>
+      <div className="absolute top-[40%] left-[60%] w-[120px] h-[120px] bg-purple-600 rounded-full blur-2xl opacity-20"></div>
+
+      <div className="max-w-4xl mx-auto flex flex-col items-center z-10 relative">
+        {/* Profile Picture & Info */}
+        <div className="relative flex flex-col items-center w-full">
+          <Avatar className="w-32 h-32 mb-4 shadow-lg border-4 border-yellow-400">
+            <AvatarImage src={user.image || '/default-avatar.png'} alt={user.fullName || user.username || 'User'} />
+            <AvatarFallback>{(user.username || user.fullName || '?')[0]}</AvatarFallback>
+          </Avatar>
+          <div className="text-center mb-6">
+            <div className="text-3xl font-orbitron font-bold text-yellow-400 glitch">{user.fullName || user.username}</div>
+            <div className="text-md text-pink-400 mb-1 font-orbitron">@{user.username}</div>
+          </div>
+          <Dialog open={editOpen} onOpenChange={setEditOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="absolute top-2 right-2 font-orbitron border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
+                size="icon"
+                aria-label="Edit Profile"
+              >
+                <Pencil className="w-5 h-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-black/90 border-2 border-yellow-400 rounded-2xl font-orbitron max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-yellow-400">Edit Profile</DialogTitle>
+              </DialogHeader>
+              <UpdateProfile user={user} onClose={() => setEditOpen(false)} onUpdate={updateUser} />
+              <DialogFooter>
+                {/* Save/Cancel handled in UpdateProfile */}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
+
         {/* Battle Stats */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {battleStats.map((stat, idx) => {
             const IconComponent = stat.icon;
             return (
-              <Card key={idx} className="hover:shadow-lg transition-shadow duration-200">
+              <Card key={idx} className="bg-black/60 border-2 border-yellow-400 rounded-2xl hover:shadow-lg transition-shadow duration-200 font-orbitron">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">{stat.title}</CardTitle>
+                  <CardTitle className="text-sm font-bold text-yellow-400">{stat.title}</CardTitle>
                   <IconComponent className={`w-5 h-5 ${stat.color}`} />
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</div>
+                    <div className="text-2xl font-bold text-white">{stat.value}</div>
                     {stat.change && (
                       <Badge
                         variant="secondary"
@@ -122,53 +150,87 @@ const Profile = () => {
             );
           })}
         </div>
-        <Separator className="my-6" />
+
+        <Separator className="my-8 bg-yellow-400" />
+
         {/* Current Battle */}
-        <div className="w-full mb-8">
-          <div className="text-xl font-bold text-secondary mb-2">Current Battle</div>
+        <div className="w-full mb-12">
+          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Current Battle</div>
           {localLoading || loading ? (
-            <Skeleton className="w-full h-32" />
+            <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
           ) : currentBattle ? (
             <BattleCard battle={currentBattle} />
           ) : (
-            <div className="text-gray-400">No current battle.</div>
+            <div className="text-gray-400 font-orbitron">No current battle.</div>
           )}
         </div>
-        <Separator className="my-6" />
+
+        <Separator className="my-8 bg-yellow-400" />
+
         {/* Recent Battles */}
-        <div className="w-full mb-8">
-          <div className="text-xl font-bold text-secondary mb-2">Recent Battles</div>
+        <div className="w-full mb-12">
+          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Recent Battles</div>
           {localLoading || loading ? (
-            <Skeleton className="w-full h-32" />
+            <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
           ) : recentBattles.length > 0 ? (
-            <div className="flex flex-col flex-wrap gap-5">
+            <div className="flex flex-col flex-wrap gap-6">
               {recentBattles.map(b => <BattleCard key={b._id} battle={b} />)}
             </div>
           ) : (
-            <div className="text-gray-400">No recent battles.</div>
+            <div className="text-gray-400 font-orbitron">No recent battles.</div>
           )}
         </div>
-        <Separator className="my-6" />
+
+        <Separator className="my-8 bg-yellow-400" />
+
         {/* Popular Battles */}
-        <div className="w-full mb-8">
-          <div className="text-xl font-bold text-secondary mb-2">Popular Battles</div>
+        <div className="w-full mb-12">
+          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Popular Battles</div>
           {localLoading || loading ? (
-            <Skeleton className="w-full h-32" />
+            <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
           ) : popularBattles.length > 0 ? (
-            <div className="flex flex-col flex-wrap gap-5">
+            <div className="flex flex-col flex-wrap gap-6">
               {popularBattles.map(b => <BattleCard key={b._id} battle={b} />)}
             </div>
           ) : (
-            <div className="text-gray-400">No popular battles.</div>
+            <div className="text-gray-400 font-orbitron">No popular battles.</div>
           )}
         </div>
-        <Separator className="my-6" />
+
+        <Separator className="my-8 bg-yellow-400" />
+
         {/* User's Tracks */}
-        <div className="w-full mb-8">
-          <div className="text-xl font-bold text-secondary mb-2">Your Tracks</div>
+        <div className="w-full mb-12">
+          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Your Tracks</div>
           <TrackList tracks={userTracks} canUpload={true} rapperId={user._id} isOwner={true} />
         </div>
       </div>
+      <style>
+        {`
+          .font-orbitron {
+            font-family: 'Orbitron', 'Roboto Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+          .glitch {
+            animation: glitch 1.5s infinite linear alternate-reverse;
+            position: relative;
+            color: transparent;
+            background: linear-gradient(90deg,#facc15,#f472b6,#a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            text-shadow: 0 0 8px #facc15, 0 0 2px #fff;
+          }
+          @keyframes glitch {
+            0% { text-shadow: 2px 0 #facc15, -2px 0 #f472b6; }
+            20% { text-shadow: -2px 2px #a78bfa, 2px -2px #fff; }
+            40% { text-shadow: 2px 2px #facc15, -2px -2px #f472b6; }
+            60% { text-shadow: -2px 0 #a78bfa, 2px 0 #fff; }
+            80% { text-shadow: 2px -2px #facc15, -2px 2px #f472b6; }
+            100% { text-shadow: 0 0 8px #facc15, 0 0 2px #fff; }
+          }
+        `}
+      </style>
     </div>
   );
 };

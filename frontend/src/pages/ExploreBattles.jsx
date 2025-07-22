@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Upload } from "lucide-react";
 import { useBattle } from '../contexts/BattleContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
-import BattleCard from '../components/BattleCard';
+// import { useNavigate } from "react-router-dom";
+import {BattleCard} from '../components';
 const SORT_OPTIONS = [
   { value: 'createdAt', label: 'Newest' },
   { value: 'votes', label: 'Most Voted' }
@@ -29,7 +25,7 @@ const ExploreBattles = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState('createdAt');
   const [status, setStatus] = useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const getBattles = async(token) => {
@@ -60,74 +56,121 @@ const ExploreBattles = () => {
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
 
   return (
-    <div className="min-h-screen p-6">
-    
-      <div className="max-w-5xl mx-auto">
-        <Card className="mb-6 bg-">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-pink-900 relative overflow-hidden py-8 px-2">
+      {/* Blurred neon shapes */}
+      <div className="absolute top-[-80px] left-[-120px] w-[300px] h-[300px] bg-pink-600 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute bottom-[-60px] right-0 w-[200px] h-[200px] bg-yellow-400 rounded-full blur-3xl opacity-20"></div>
+      <div className="absolute top-[40%] left-[60%] w-[120px] h-[120px] bg-purple-600 rounded-full blur-2xl opacity-20"></div>
+
+      <div className="max-w-5xl mx-auto z-10 relative">
+        <Card className="mb-10 bg-black/60 border-2 border-yellow-400 rounded-3xl shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl text-secondary text-center">Explore Battles</CardTitle>
+            <CardTitle className="text-4xl font-orbitron text-yellow-400 text-center glitch py-4">
+              Explore Battles
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <div className="flex gap-2 items-center">
-                <label htmlFor="sort" className="text-white">Sort by:</label>
+                <label htmlFor="sort" className="text-yellow-400 font-orbitron">Sort by:</label>
                 <select
                   id="sort"
                   value={sort}
                   onChange={handleSortChange}
-                  className="rounded-md bg-transparent border border-secondary px-2 py-1 text-white"
+                  className="rounded-md bg-gray-900 border-yellow-400 px-3 py-2 text-yellow-400 font-orbitron"
                 >
                   {SORT_OPTIONS.map(opt => (
-                    <option className='text-primary' key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
               <div className="flex gap-2 items-center">
-                <label htmlFor="status" className="text-white">Status:</label>
+                <label htmlFor="status" className="text-yellow-400 font-orbitron">Status:</label>
                 <select
                   id="status"
                   value={status}
                   onChange={handleStatusChange}
-                  className="rounded-md bg-transparent border border-secondary px-2 py-1 text-white"
+                  className="rounded-md bg-gray-900 border-yellow-400 px-3 py-2 text-yellow-400 font-orbitron"
                 >
                   {STATUS_OPTIONS.map(opt => (
-                    <option className='text-primary' key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
             </div>
             {loading && (
               <div className="flex justify-center items-center min-h-[10rem]">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-400"></div>
               </div>
             )}
             {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div className="flex justify-center mb-4">
+                <span className="text-red-400 font-orbitron">{error}</span>
+              </div>
             )}
             {!loading && !error && filteredBattles.length === 0 && (
-              <div className="text-center text-gray-400 py-8">No battles found.</div>
+              <div className="text-center text-gray-400 py-8 font-orbitron">
+                No battles found.
+              </div>
             )}
-            <div className="flex flex-col flex-wrap gap-5">
+            <div className="grid gap-8">
               {filteredBattles.map((battle) => (
-                <BattleCard battle={battle} />
+                <BattleCard key={battle._id} battle={battle} />
               ))}
             </div>
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-4 mt-8">
-                <Button onClick={handlePrev} disabled={page === 1} className="bg-primary/80">Prev</Button>
-                <span className="text-white self-center">Page {page} of {totalPages}</span>
-                <Button onClick={handleNext} disabled={page === totalPages} className="bg-primary/80">Next</Button>
+              <div className="flex justify-center gap-4 mt-10">
+                <Button
+                  onClick={handlePrev}
+                  disabled={page === 1}
+                  className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 rounded-lg"
+                >
+                  Prev
+                </Button>
+                <span className="text-yellow-400 font-orbitron self-center">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  onClick={handleNext}
+                  disabled={page === totalPages}
+                  className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 rounded-lg"
+                >
+                  Next
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
+      <style>
+        {`
+          .font-orbitron {
+            font-family: 'Orbitron', 'Roboto Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+          .glitch {
+            animation: glitch 1.5s infinite linear alternate-reverse;
+            position: relative;
+            color: transparent;
+            background: linear-gradient(90deg,#facc15,#f472b6,#a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            text-shadow: 0 0 8px #facc15, 0 0 2px #fff;
+          }
+          @keyframes glitch {
+            0% { text-shadow: 2px 0 #facc15, -2px 0 #f472b6; }
+            20% { text-shadow: -2px 2px #a78bfa, 2px -2px #fff; }
+            40% { text-shadow: 2px 2px #facc15, -2px -2px #f472b6; }
+            60% { text-shadow: -2px 0 #a78bfa, 2px 0 #fff; }
+            80% { text-shadow: 2px -2px #facc15, -2px 2px #f472b6; }
+            100% { text-shadow: 0 0 8px #facc15, 0 0 2px #fff; }
+          }
+        `}
+      </style>
     </div>
-  );
+  )
 };
 
 export default ExploreBattles;

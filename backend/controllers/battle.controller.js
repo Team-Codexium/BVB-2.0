@@ -14,12 +14,12 @@ export const createBattle = async ( req,res) =>{
          // to be check based on authentication
         // Validation if rapper 2 is not present
        if (!req.rapper || !req.rapper._id) {
-  console.log("req.rapper is undefined or invalid");
-  return res.status(401).json({
-    success: false,
-    message: 'Unauthorized. Please log in again.'
-  });
-}
+        console.log("req.rapper is undefined or invalid");
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized. Please log in again.'
+        });
+      }
         if(!rapper2Id) {
             return res.status(400).json({
                 success:false,

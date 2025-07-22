@@ -1,5 +1,7 @@
 import { Rapper } from "../models/rapper.model.js";
 import { Battle } from "../models/battle.model.js";
+import { uploadToCloudinary } from "../utils/utils.js";
+import { v2 as Cloudinary } from "cloudinary";
 
 // Get all rappers (with pagination and search)
 export const getAllRappers = async (req, res) => {
@@ -37,36 +39,63 @@ export const getAllRappers = async (req, res) => {
 };
 
 // Get a single rapper by ID
-// export const getRapperById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const rapper = await Rapper.findById(id);
-//     if (!rapper) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Rapper not found",
-//       });
-//     }
-//     res.status(200).json({
-//       success: true,
-//       data: rapper,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to fetch rapper",
-//       error: process.env.NODE_ENV === "development" ? error.message : undefined,
-//     });
-//   }
-// };
+export const getRapperById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rapper = await Rapper.findById(id);
+    if (!rapper) {
+      return res.status(404).json({
+        success: false,
+        message: "Rapper not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: rapper,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch rapper",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
 
 // Update a rapper (profile update)
 export const updateRapper = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.rapper._id;
+    // console.log(id);
     const updateData = req.body;
     // Optionally: prevent updating sensitive fields like password here
-    delete updateData.password;
+    // delete updateData.password;
+    const image = req.file;
+    // console.log("Image file:", image);
+    //console.log('Request',req.body, req.file)
+    let imageUrl = null;
+
+    if (image) {
+      const cloud_res = await new Promise((resolve, reject) => {
+        const stream = Cloudinary.uploader.upload_stream(
+          {
+            folder: "Profile-Images",
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(image.buffer);
+      });
+
+      // console.log("Cloudinary response:", cloud_res);
+      imageUrl = cloud_res.secure_url;
+    }
+    updateData.image = imageUrl || updateData.image;
+
+    //  console.log("Image URL:", imageUrl);
 
     const updatedRapper = await Rapper.findByIdAndUpdate(id, updateData, {
       new: true,

@@ -1,5 +1,6 @@
 import { Battle } from '../models/battle.model.js';
 import cron from 'node-cron'
+import { v2 as Cloudinary } from 'cloudinary';
 
 async function checkAndCompleteExpiredBattles() {
   const now = new Date();
@@ -26,3 +27,23 @@ async function checkAndCompleteExpiredBattles() {
 }
 
 cron.schedule('*/10 * * * *', checkAndCompleteExpiredBattles);
+
+
+
+export const uploadToCloudinary = async (buffer) => {
+  const cloud_res = await new Promise((resolve, reject) => {
+      const stream = Cloudinary.uploader.upload_stream(
+        {
+          folder: "Profile-Images",
+          resource_type: 'image'
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      stream.end(image.buffer);
+    });
+
+    return cloud_res.secure_url;
+};

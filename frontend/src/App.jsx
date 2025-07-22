@@ -26,16 +26,13 @@ const App = () => {
         <Route path="/email-verification" element={<EmailVerificationPage />} />
         
         {/* Root Route: If user, go to dashboard, else Home */}
-        <Route path="/*" element={user ? <Navigate to="/dashboard" replace /> : <Home />} />
+        {/* <Route path="/*" element={user ? <Navigate to="/dashboard" replace /> : <Home />} /> */}
 
         {/* Protected Dashboard and nested routes */}
         <Route 
-          path="/dashboard/*" 
-          element={
-            <ProtectedRoute>
-              <DashBoard />
-            </ProtectedRoute>
-          } 
+          path="/*" 
+          element={user ? <ProtectedRoute><DashBoard /></ProtectedRoute> : <Home />}
+           
         />
 
         {/* Catch all route - redirects to root */}
