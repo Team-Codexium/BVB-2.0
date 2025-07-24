@@ -85,7 +85,7 @@ const battleSchema = new mongoose.Schema({
     default: null
   },
   timeLimit: {
-    type: Date, // Time limit in minutes
+    type: Number, // Time limit in minutes
     required: [true, 'Time limit is required'], 
   },
   rapper1Votes:{

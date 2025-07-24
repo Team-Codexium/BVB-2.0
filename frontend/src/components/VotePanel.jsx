@@ -8,7 +8,6 @@ import { ThumbsUp, Crown, Flame, Mic, Check, Lock } from "lucide-react"
 
 export default function VotingComponent({
   rapperId,
-  rapperName,
   currentVotes,
   hasVoted,
   votedForThisRapper,
@@ -100,14 +99,14 @@ export default function VotingComponent({
   }
 
   return (
-    <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm" >
-      <CardContent className="p-4">
-        <div className="space-y-4">
+    <Card className="bg-black/60 border-2 border-yellow-400 rounded-2xl shadow-lg font-orbitron">
+      <CardContent className="p-6">
+        <div className="space-y-6">
           {/* Vote Count Display */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <ThumbsUp className="w-5 h-5 text-purple-400" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <ThumbsUp className="w-6 h-6 text-purple-400 animate-bounce" />
+              <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow">
                 {currentVotes}
               </span>
             </div>
@@ -118,7 +117,7 @@ export default function VotingComponent({
           <Button
             onClick={handleVote}
             disabled={isDisabled}
-            className={`w-full h-12 font-semibold text-sm transition-all duration-300 ${getButtonStyles()} ${
+            className={`w-full h-12 font-semibold text-base transition-all duration-300 rounded-xl border-2 ${getButtonStyles()} ${
               isAnimating ? "scale-105 animate-pulse" : ""
             }`}
           >
@@ -148,6 +147,22 @@ export default function VotingComponent({
           )}
         </div>
       </CardContent>
+      <style>
+        {`
+          .font-orbitron {
+            font-family: 'Orbitron', 'Roboto Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+          .animate-glow {
+            animation: glow 1.5s infinite alternate;
+          }
+          @keyframes glow {
+            0% { text-shadow: 0 0 8px #facc15, 0 0 2px #fff; }
+            100% { text-shadow: 0 0 16px #f472b6, 0 0 8px #a78bfa; }
+          }
+        `}
+      </style>
     </Card>
   )
 }

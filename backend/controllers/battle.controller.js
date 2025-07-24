@@ -13,12 +13,12 @@ export const createBattle = async (req, res) => {
     // to be check based on authentication
     // Validation if rapper 2 is not present
     if (!req.rapper || !req.rapper._id) {
-      console.log("req.rapper is undefined or invalid");
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized. Please log in again.",
-      });
-    }
+            console.log("req.rapper is undefined or invalid");
+            return res.status(401).json({
+              success: false,
+              message: "Unauthorized. Please log in again.",
+            });
+          }
     if (!rapper2Id) {
       return res.status(400).json({
         success: false,
@@ -184,7 +184,7 @@ export const acceptBattle = async (req, res) => {
     const rapper2Id = req.rapper._id;
     //considering the rapper1 is one who create the battle and rapper2 is the one whp
     //accept the battle
-
+    console.log("accept battle controller",battleId,rapper2Id)
     // find the battle
     const battle = await Battle.findById(battleId)
       .populate("rapper1", "username fullName email rank")
@@ -244,9 +244,13 @@ export const acceptBattle = async (req, res) => {
     //email sent code completed
     const updatedBattle = await Battle.findByIdAndUpdate(
       battleId,
-      { status: "active", 
-        startTime:Date.now(),
-        endTime:Date.now().getTime() +battle.timeLimit*24 * 60 * 60 * 1000
+      { 
+        
+        $set:{
+          status: "active", 
+         startTime: new Date(),
+        endTime: new Date(Date.now() + battle.timeLimit * 60 * 1000)
+        }
       },
       { new: true }
     );
@@ -307,9 +311,9 @@ export const getBattleByRapperId = async (req, res) => {
         { "rapper2": rapperId },
       ],
     })
-      .populate("rapper1", "username fullName email rank")
-      .populate("rapper2", "username fullName email rank")
-      .populate("winner", "username fullName email rank");
+      .populate("rapper1", "username fullName email rank image")
+      .populate("rapper2", "username fullName email rank image")
+      .populate("winner", "username fullName email rank image");
 
     return res.status(200).json({
       success: true,
@@ -330,10 +334,10 @@ export const getAllBattles = async (req, res) => {
   //this to be used in diplaying battle card in explore battles
   try {
     const battles = await Battle.find()
-      .populate("rapper1", "username fullName email rank")
-      .populate("rapper2", "username fullName email rank")
-      .populate("winner", "username fullName email rank");
-
+      .populate("rapper1", "username fullName email rank image")
+      .populate("rapper2", "username fullName email rank image")
+      .populate("winner", "username fullName email rank image");
+    //console.log(battles);
     return res.status(200).json({
       success: true,
       message: "All battles found",

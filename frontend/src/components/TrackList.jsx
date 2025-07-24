@@ -15,7 +15,7 @@ export default function TrackList({
   canUpload,
 }) {
   const [isUploading, setIsUploading] = useState(false)
-  const [trackName, setTrackName] = useState(`Track ${tracks.length+1}`)
+  const [trackName, setTrackName] = useState(`Track ${tracks.length + 1}`)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
@@ -44,7 +44,7 @@ export default function TrackList({
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
-    setTrackName(`Track ${tracks.length+1}`);
+    setTrackName(`Track ${tracks.length + 1}`);
   };
 
   const handleUpload = async () => {
@@ -53,7 +53,7 @@ export default function TrackList({
     await onTrackUpload(rapperId, selectedFile, trackName.trim() || selectedFile.name.replace(/\.[^/.]+$/, ""));
     setUploading(false);
     setSelectedFile(null);
-    setTrackName(`Track ${tracks.length+1}`);
+    setTrackName(`Track ${tracks.length + 1}`);
     setIsUploading(false);
   };
 
@@ -109,9 +109,8 @@ export default function TrackList({
             />
             {!selectedFile ? (
               <div
-                className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                  dragOver ? "border-purple-400 bg-purple-900/20" : "border-gray-600 hover:border-purple-500"
-                }`}
+                className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${dragOver ? "border-purple-400 bg-purple-900/20" : "border-gray-600 hover:border-purple-500"
+                  }`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -206,13 +205,13 @@ export default function TrackList({
                     className={`mr-3 flex items-center justify-center w-9 h-9 rounded-full transition-colors ${isExpanded ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg' : 'bg-gray-800 hover:bg-purple-700/80'}`}
                   >
                     {isExpanded ? (
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#fff"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#fff"/></svg>
+                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#fff" /><rect x="14" y="5" width="4" height="14" rx="1" fill="#fff" /></svg>
                     ) : (
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff" /></svg>
                     )}
                   </button>
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-white font-semibold text-sm truncate">{track.title || `Track ${i+1}`}</span>
+                    <span className="text-white font-semibold text-sm truncate">{track.title || `Track ${i + 1}`}</span>
                     <span className="text-xs text-gray-400 truncate">Audio Track</span>
                   </div>
                   <span className="text-xs text-gray-400 ml-4 min-w-[70px] text-right">{track.date || new Date().toLocaleDateString()}</span>

@@ -5,10 +5,9 @@ import { Calendar } from "lucide-react"
 import { useParams } from "react-router-dom"
 import { useBattle } from "../contexts/BattleContext"
 import { useAuth } from "../contexts/AuthContext"
-import TrackList from "../components/TrackList"
+import {TrackList,VotingComponent} from "../components"
 import axios from "axios"
 import { Alert } from "@/components/ui/alert"
-import VotingComponent from "../components/VotePanel"
 import { Progress } from "@/components/ui/progress"
 
 export default function BattleDetails() {
@@ -21,7 +20,7 @@ export default function BattleDetails() {
   const { battleId } = useParams()
   const { getBattleById, battle } = useBattle()
   const { token, user } = useAuth()
-
+  console.log("battle in Battle deatail = ",battle);
   const refreshBattle = () => {
     getBattleById(battleId, token)
   }
@@ -79,11 +78,11 @@ export default function BattleDetails() {
     }
   }, [battle?.timeLimit, battle?.createdAt])
 
-  const rapper1 = battle?.contestants?.rapper1
-  const rapper2 = battle?.contestants?.rapper2
+  const rapper1 = battle?.rapper1
+  const rapper2 = battle?.rapper2
   const votes = {
-    rapper1: battle?.voting?.rapper1Votes || 0,
-    rapper2: battle?.voting?.rapper2Votes || 0,
+    rapper1: battle?.rapper1Votes || 0,
+    rapper2: battle?.rapper2Votes || 0,
   }
 
   const totalVotes = votes.rapper1 + votes.rapper2
@@ -109,7 +108,7 @@ export default function BattleDetails() {
     }
   }
 
-  if (loading || !battle?.contestants) {
+  if (loading || !battle?.rapper1 || !battle?.rapper2) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -118,52 +117,53 @@ export default function BattleDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-pink-900/20 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-pink-900 relative overflow-hidden py-8 px-2">
+      {/* Blurred neon shapes */}
+      <div className="absolute top-[-80px] left-[-120px] w-[300px] h-[300px] bg-pink-600 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute bottom-[-60px] right-0 w-[200px] h-[200px] bg-yellow-400 rounded-full blur-3xl opacity-20"></div>
+      <div className="absolute top-[40%] left-[60%] w-[120px] h-[120px] bg-purple-600 rounded-full blur-2xl opacity-20"></div>
+
+      <div className="max-w-6xl mx-auto space-y-10 z-10 relative">
         {alertMsg && (
-          <Alert className="mb-4" onClick={() => setAlertMsg("")}>
+          <Alert className="mb-4 font-orbitron text-yellow-400 bg-black/80 border-yellow-400" onClick={() => setAlertMsg("")}>
             {alertMsg}
           </Alert>
         )}
 
         {/* Battle Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            {battle?.title}
-          </h1>
+          <h1 className="text-4xl font-orbitron font-bold text-yellow-400 glitch">{battle?.title}</h1>
           <div className="flex items-center justify-center gap-4">
-            <Badge variant="outline" className="border-purple-500 text-purple-400">
+            <Badge variant="outline" className="border-purple-500 text-purple-400 font-orbitron">
               <Calendar className="w-3 h-3 mr-1" />
-              Live Battle
+             {battle.timeLimit}
             </Badge>
-            <Badge variant="outline" className="border-pink-500 text-pink-400">
+            <Badge variant="outline" className="border-pink-500 text-pink-400 font-orbitron">
               Status: {battle?.status}
             </Badge>
           </div>
           <div className="flex flex-col items-center space-y-2">
-            <Progress value={progress} className="w-[60%] bg-red-950"
-            style={{'--progress-foreground': '#fffff'}} 
-            />
-            <div className=" font-medium text-sm">
+            <Progress value={progress} className="w-[60%] bg-yellow-900/30" />
+            <div className="font-orbitron font-medium text-sm text-yellow-400">
               {timeRemaining}
             </div>
           </div>
         </div>
 
         {/* Battle Arena */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Rapper 1 Card */}
-          <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+          <Card className="bg-black/60 border-2 border-purple-400 rounded-2xl shadow-lg font-orbitron">
             <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full mx-auto mb-4 overflow-hidden">
-                <img src={rapper1?.image} alt="" className="object-cover w-full h-full" />
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full mx-auto mb-4 overflow-hidden border-2 border-yellow-400 shadow">
+                <img src={rapper1?.image || "/default-avatar.png"} alt="" className="object-cover w-full h-full" />
               </div>
-              <CardTitle className="text-white text-xl">{rapper1?.username}</CardTitle>
+              <CardTitle className="text-yellow-400 text-xl glitch">{rapper1?.username}</CardTitle>
               <p className="text-gray-400">The Lightning Lyricist</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <TrackList
-                tracks={battle?.rapper1_audio_urls}
+                tracks={Array.isArray(battle?.rapper1_audio_urls) ? battle.rapper1_audio_urls : []}
                 artist={rapper1?.username}
                 rapperId={rapper1?._id}
                 onTrackUpload={handleTrackUpload}
@@ -185,17 +185,17 @@ export default function BattleDetails() {
           </Card>
 
           {/* Rapper 2 Card */}
-          <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+          <Card className="bg-black/60 border-2 border-pink-400 rounded-2xl shadow-lg font-orbitron">
             <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-pink-600 to-pink-800 rounded-full mx-auto mb-4 overflow-hidden">
-                <img src={rapper2?.image} alt="" className="object-cover w-full h-full" />
+              <div className="w-20 h-20 bg-gradient-to-r from-pink-600 to-pink-800 rounded-full mx-auto mb-4 overflow-hidden border-2 border-yellow-400 shadow">
+                <img src={rapper2?.image || "/default-avatar.png"} alt="" className="object-cover w-full h-full" />
               </div>
-              <CardTitle className="text-white text-xl">{rapper2?.username}</CardTitle>
+              <CardTitle className="text-yellow-400 text-xl glitch">{rapper2?.username}</CardTitle>
               <p className="text-gray-400">Fire on the Mic</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <TrackList
-                tracks={battle?.rapper2_audio_urls}
+                tracks={Array.isArray(battle?.rapper2Tracks) ? battle.rapper2Tracks: []}
                 artist={rapper2?.username}
                 rapperId={rapper2?._id}
                 onTrackUpload={handleTrackUpload}
@@ -218,16 +218,16 @@ export default function BattleDetails() {
         </div>
 
         {/* Battle Stats */}
-        <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+        <Card className="bg-black/60 border-2 border-yellow-400 rounded-2xl shadow-lg font-orbitron">
           <CardContent className="p-6">
             <div className="text-center space-y-4">
-              <h3 className="text-white font-semibold text-lg">Battle Statistics</h3>
+              <h3 className="text-yellow-400 font-bold text-lg glitch">Battle Statistics</h3>
               <div className="flex justify-center items-center gap-8">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-400">{votes.rapper1}</div>
                   <div className="text-sm text-gray-400">{rapper1?.username}</div>
                 </div>
-                <div className="text-gray-500 text-xl">VS</div>
+                <div className="text-pink-400 text-xl font-orbitron">VS</div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-pink-400">{votes.rapper2}</div>
                   <div className="text-sm text-gray-400">{rapper2?.username}</div>
@@ -243,6 +243,32 @@ export default function BattleDetails() {
           </CardContent>
         </Card>
       </div>
+      <style>
+        {`
+          .font-orbitron {
+            font-family: 'Orbitron', 'Roboto Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+          .glitch {
+            animation: glitch 1.5s infinite linear alternate-reverse;
+            position: relative;
+            color: transparent;
+            background: linear-gradient(90deg,#facc15,#f472b6,#a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            text-shadow: 0 0 8px #facc15, 0 0 2px #fff;
+          }
+          @keyframes glitch {
+            0% { text-shadow: 2px 0 #facc15, -2px 0 #f472b6; }
+            20% { text-shadow: -2px 2px #a78bfa, 2px -2px #fff; }
+            40% { text-shadow: 2px 2px #facc15, -2px -2px #f472b6; }
+            60% { text-shadow: -2px 0 #a78bfa, 2px 0 #fff; }
+            80% { text-shadow: 2px -2px #facc15, -2px 2px #f472b6; }
+            100% { text-shadow: 0 0 8px #facc15, 0 0 2px #fff; }
+          }
+        `}
+      </style>
     </div>
   )
 }

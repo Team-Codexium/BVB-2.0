@@ -175,6 +175,19 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line
   }, [token]);
 
+  const updateUser = async(formData) => {
+    setLoading(true);
+    try {
+      const response = await axios.patch(`${API_URL}/api/rappers/update`, formData, {headers: { Authorization: `Bearer ${token}` } });
+      console.log(response)
+      setUser(response.data.rapper);
+      setLoading(false);
+      return response.data.rapper;
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
   const value = {
     user, setUser,
     token,
@@ -191,6 +204,7 @@ export const AuthProvider = ({ children }) => {
     verifyOTP,
     resendOTP,
     checkEmailVerification,
+    updateUser
   };
 
   return (

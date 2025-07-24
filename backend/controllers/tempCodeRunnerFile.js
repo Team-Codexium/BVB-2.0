@@ -1,4 +1,6 @@
-$or: {
-        'contestants.rapper1': rapperId,
-        'contestants.rapper2': rapperId,        
-      }
+const query = {
+  $or: [
+    { rapper1: rapperId },
+    { rapper2: rapperId }
+  ]
+};

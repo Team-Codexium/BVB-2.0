@@ -5,19 +5,19 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { BattleProvider } from './contexts/BattleContext.jsx'
-import { ArtistProvider } from './contexts/ArtistContext.jsx'
+import { RapperProvider } from './contexts/ArtistContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-    <BattleProvider>
-      <ArtistProvider>
-        <AuthProvider>
-          
+      <BattleProvider>
+        <RapperProvider>
+          <AuthProvider>
+
             <App />
-        </AuthProvider>
-      </ArtistProvider>
-    </BattleProvider>
-          </BrowserRouter>
+          </AuthProvider>
+        </RapperProvider>
+      </BattleProvider>
+    </BrowserRouter>
   </StrictMode>,
 )

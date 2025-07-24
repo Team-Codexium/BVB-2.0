@@ -9,6 +9,7 @@ import { AppSidebar } from '../components/AppSidebar'
 import { SidebarProvider } from "../components/ui/sidebar"
 import Profile from './Profile'
 import MyBattles from './MyBattles'
+import RapperProfile from './RapperProfile'
 
 
 const DashBoard = () => {
@@ -27,6 +28,7 @@ const DashBoard = () => {
         <Route path="/battle/:battleId" element={<Battlepage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-battles" element={<MyBattles />} />
+        <Route path="/rapper/:id" element={<RapperProfile />} />
       </Routes>
     </div>
   )
