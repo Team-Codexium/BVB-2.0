@@ -12,12 +12,16 @@ import { Flame, Trophy, Swords, Crown, Star, Target, TrendingUp, Pencil } from '
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import UpdateProfile from '../components/UpdateProfile';
+import { useRapper } from '../contexts/RapperContext';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { user, token, updateUser } = useAuth();
   const { battles, loading, getBattleByRapperId } = useBattle();
+  const { stats, fetchRapperDetails } = useRapper();
   const [localLoading, setLocalLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch user's battles on mount
   useEffect(() => {
@@ -32,6 +36,12 @@ const Profile = () => {
     // eslint-disable-next-line
   }, [user?._id, token]);
 
+  useEffect(() => {
+    if (user?._id) {
+      fetchRapperDetails(user._id);
+    }
+  }, [user?._id]);
+
   // Filter battles for stats and sections
   const userBattles = useMemo(() => {
     if (!user?._id) return [];
@@ -40,25 +50,8 @@ const Profile = () => {
     );
   }, [battles, user?._id]);
 
-  // Battle stats (mocked if not available)
-  const totalBattles = userBattles.length;
-  const wins = userBattles.filter(b => b.winner?._id === user?._id).length;
-  const winRate = totalBattles ? Math.round((wins / totalBattles) * 100) : 0;
-  const ranking = user?.rank || '#--';
-  const score = user?.score || 0;
-  const accuracy = 'N/A'; // TODO: If available
-
-  // Recent battles (sorted by createdAt desc)
-  const recentBattles = [...userBattles].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
-  // Popular battles (sorted by votes desc)
-  const popularBattles = [...userBattles].sort((a, b) => {
-    const vA = (a.rapper1Votes || 0) + (a.rapper2Votes || 0);
-    const vB = (b.rapper1Votes || 0) + (b.rapper2Votes || 0);
-    return vB - vA;
-  }).slice(0, 3);
-
-  // Current battle (first active) Sorting based on status
-  const currentBattle = userBattles.find(b => b.status === 'active' || b.status === 'started');
+  // Show only 3 recent battles
+  const displayedBattles = userBattles.slice(0, 3);
 
   // User's tracks (from all battles)
   const userTracks = userBattles.flatMap(b => {
@@ -67,15 +60,26 @@ const Profile = () => {
     return [];
   });
 
-  // Battle stats cards
-  const battleStats = [
-    { title: 'Total Battles', value: totalBattles, icon: Swords, color: 'text-blue-600', change: '', changeType: 'positive' },
-    { title: 'Wins', value: wins, icon: Trophy, color: 'text-yellow-600', change: '', changeType: 'positive' },
-    { title: 'Win Rate', value: `${winRate}%`, icon: Flame, color: 'text-red-600', change: '', changeType: 'positive' },
-    { title: 'Ranking', value: ranking, icon: Crown, color: 'text-purple-600', change: '', changeType: 'positive' },
-    { title: 'Score', value: score, icon: Star, color: 'text-green-600', change: '', changeType: 'positive' },
-    { title: 'Accuracy', value: accuracy, icon: Target, color: 'text-indigo-600', change: '', changeType: 'positive' },
-  ];
+  // Use stats from backend if available
+  const battleStats = stats.map((stat) => {
+    let icon = Star, color = "text-green-600";
+    switch (stat.title) {
+      case "Total Battles": icon = Swords; color = "text-blue-600"; break;
+      case "Wins": icon = Trophy; color = "text-yellow-600"; break;
+      case "Win Rate": icon = Flame; color = "text-red-600"; break;
+      case "Ranking": icon = Crown; color = "text-purple-600"; break;
+      case "Total Score": icon = Star; color = "text-green-600"; break;
+      case "Losses": icon = Target; color = "text-pink-600"; break;
+      case "Draws": icon = Target; color = "text-indigo-600"; break;
+      case "Tier": icon = Crown; color = "text-yellow-400"; break;
+      case "Active Battles": icon = Flame; color = "text-orange-400"; break;
+      case "Pending Battles": icon = Swords; color = "text-gray-400"; break;
+      case "Completed Battles": icon = Trophy; color = "text-green-400"; break;
+      case "Votes Received": icon = Star; color = "text-yellow-400"; break;
+      default: icon = Star; color = "text-green-600";
+    }
+    return { ...stat, icon, color };
+  });
 
   if (!user) {
     return <div className="flex items-center justify-center min-h-[40vh]"><Skeleton className="w-full h-64" /></div>;
@@ -135,15 +139,6 @@ const Profile = () => {
                 <CardContent>
                   <div className="flex items-baseline gap-2">
                     <div className="text-2xl font-bold text-white">{stat.value}</div>
-                    {stat.change && (
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs ${stat.changeType === 'positive' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}
-                      >
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        {stat.change}
-                      </Badge>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -153,47 +148,28 @@ const Profile = () => {
 
         <Separator className="my-8 bg-yellow-400" />
 
-        {/* Current Battle */}
+        {/* Recent Battles (show only 3, button for more) */}
         <div className="w-full mb-12">
-          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Current Battle</div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xl font-orbitron font-bold text-yellow-400 glitch">Your Recent Battles</div>
+            {userBattles.length > 3 && (
+              <Button
+                variant="outline"
+                className="font-orbitron border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
+                onClick={() => navigate('/dashboard/mybattles')}
+              >
+                See More
+              </Button>
+            )}
+          </div>
           {localLoading || loading ? (
             <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
-          ) : currentBattle ? (
-            <BattleCard battle={currentBattle} />
-          ) : (
-            <div className="text-gray-400 font-orbitron">No current battle.</div>
-          )}
-        </div>
-
-        <Separator className="my-8 bg-yellow-400" />
-
-        {/* Recent Battles */}
-        <div className="w-full mb-12">
-          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Recent Battles</div>
-          {localLoading || loading ? (
-            <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
-          ) : recentBattles.length > 0 ? (
+          ) : displayedBattles.length > 0 ? (
             <div className="flex flex-col flex-wrap gap-6">
-              {recentBattles.map(b => <BattleCard key={b._id} battle={b} />)}
+              {displayedBattles.map(b => <BattleCard key={b._id} battle={b} />)}
             </div>
           ) : (
-            <div className="text-gray-400 font-orbitron">No recent battles.</div>
-          )}
-        </div>
-
-        <Separator className="my-8 bg-yellow-400" />
-
-        {/* Popular Battles */}
-        <div className="w-full mb-12">
-          <div className="text-xl font-orbitron font-bold text-yellow-400 mb-4 glitch">Popular Battles</div>
-          {localLoading || loading ? (
-            <Skeleton className="w-full h-32 rounded-2xl bg-gray-800/60" />
-          ) : popularBattles.length > 0 ? (
-            <div className="flex flex-col flex-wrap gap-6">
-              {popularBattles.map(b => <BattleCard key={b._id} battle={b} />)}
-            </div>
-          ) : (
-            <div className="text-gray-400 font-orbitron">No popular battles.</div>
+            <div className="text-gray-400 font-orbitron">No battles found.</div>
           )}
         </div>
 

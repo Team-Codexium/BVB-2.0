@@ -212,3 +212,54 @@ export const deleteAudioFromBattle=async(req,res)=>
       });
     }
 }
+
+export const getAudioByRapper = async (req, res) => {
+  try {
+    const { rapperId } = req.params;
+    if (!rapperId) {
+      return res.status(400).json({
+        success: false,
+        message: "Rapper ID is required"
+      });
+    }
+
+    const battles = await Battle.find({
+      $or: [
+        { rapper1: rapperId },
+        { rapper2: rapperId }
+      ]
+    });
+
+    if (!battles || battles.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No battles found for this rapper"
+      });
+    }
+
+    const audioUrls = battles.flatMap(battle => {
+      if (battle.rapper1.toString() === rapperId) {
+        return battle.rapper1Tracks.map(track => ({
+          title: track.title,
+          url: track.url
+        }));
+      } else {
+        return battle.rapper2Tracks.map(track => ({
+          title: track.title,
+          url: track.url
+        }));
+      }
+    });
+
+    res.json({
+      success: true,
+      audioUrls
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get audio by rapper",
+    });
+  }
+}

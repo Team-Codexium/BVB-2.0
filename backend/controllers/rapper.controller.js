@@ -410,7 +410,7 @@ export const getRapperProfile = async (req, res) => {
 };
 
 // GET /api/rappers/:id/stats
-export const getRapperStats = async (req, res) => {
+export const getRapperDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -458,23 +458,23 @@ export const getRapperStats = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      stats: {
-        wins,
-        losses,
-        draws,
-        winRate,
-        ranking,
-        tier,
-        totalScore,
-        totalBattles,
-        activeBattles,
-        pendingBattles,
-        completedBattles,
-        votesReceived,
+      stats: [
+        { title: "Total Battles", value: totalBattles },
+        { title: "Wins", value: wins },
+        { title: "Losses", value: losses },
+        { title: "Draws", value: draws },
+        { title: "Win Rate", value: `${winRate}%` },
+        { title: "Ranking", value: ranking },
+        { title: "Tier", value: tier },
+        { title: "Total Score", value: totalScore },
+        { title: "Active Battles", value: activeBattles },
+        { title: "Pending Battles", value: pendingBattles },
+        { title: "Completed Battles", value: completedBattles },
+        { title: "Votes Received", value: votesReceived },
         // mostFrequentOpponent,
         // firstBattleDate: battles[0]?.createdAt,
         // lastBattleDate: battles[totalBattles-1]?.createdAt,
-      },
+      ],
       rapper: {
         id: rapper._id,
         username: rapper.username,

@@ -13,6 +13,8 @@ export const RapperProvider = ({ children }) => {
   const [rappers, setRappers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState([]);
+  const [tracks, setTracks] = useState([]);
 
   const API_URL = 'http://localhost:4000';
 
@@ -36,10 +38,44 @@ export const RapperProvider = ({ children }) => {
     setError(null);
     try {
       const res = await axios.get(`${API_URL}/api/rappers/${id}`);
+      console.log('Rapper fetched:', res);
+      // if (!res.data.success) {
       return res.data;
     } catch {
       setError('Failed to load rapper.');
       return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRapperDetails = async (id) => {
+    try {
+      const res = await axios.get(`${API_URL}/api/rappers/stats/${id}`);
+      // console.log('Stats fetched:', res);
+      if (res.data.success) {
+        setStats(res.data.stats);
+      } else {
+        setError('Failed to load stats.');
+      }
+
+      return res.data;
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      setError('Failed to load stats.');
+      return null;
+    }
+  }
+
+  const fetchTracksByRapper = async (rapperId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(`${API_URL}/api/media/${rapperId}`);
+      console.log('Tracks fetched:', res);
+      setTracks(res.data.audioUrls || []);
+    } catch {
+      setError('Failed to load tracks.');
     } finally {
       setLoading(false);
     }
@@ -56,6 +92,12 @@ export const RapperProvider = ({ children }) => {
     error,
     fetchRappers,
     fetchRapperById,
+    stats,
+    fetchRapperDetails,
+    setStats,
+    tracks,
+    fetchTracksByRapper,
+    setTracks,
   };
 
   return (

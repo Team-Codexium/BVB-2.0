@@ -17,7 +17,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { AlertCircle } from "lucide-react";
-import { useRapper } from "../contexts/ArtistContext";
+import { useRapper } from "../contexts/RapperContext";
 import { useBattle } from "../contexts/BattleContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";

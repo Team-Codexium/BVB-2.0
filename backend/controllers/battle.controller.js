@@ -305,12 +305,19 @@ export const getBattleByRapperId = async (req, res) => {
   //my battles page of current rapper thorugh his id
   try {
     const { rapperId } = req.params;
-    const battles = await Battle.find({
+    const { status } = req.query;
+    
+    const query = {
       $or: [
-        { "rapper1": rapperId },
-        { "rapper2": rapperId },
+        { rapper1: rapperId },
+        { rapper2: rapperId },
       ],
-    })
+    };
+    if (status) {
+      query.status = status;
+    }
+
+    const battles = await Battle.find(query)
       .populate("rapper1", "username fullName email rank image")
       .populate("rapper2", "username fullName email rank image")
       .populate("winner", "username fullName email rank image");

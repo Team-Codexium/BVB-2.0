@@ -5,7 +5,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { BattleProvider } from './contexts/BattleContext.jsx'
-import { RapperProvider } from './contexts/ArtistContext.jsx'
+import { RapperProvider } from './contexts/RapperContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
