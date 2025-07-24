@@ -408,3 +408,88 @@ export const getRapperProfile = async (req, res) => {
     });
   }
 };
+
+// GET /api/rappers/:id/stats
+export const getRapperStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find rapper and basic info
+    const rapper = await Rapper.findById(id).select("rank tier score username fullName image createdAt");
+    if (!rapper) {
+      return res.status(404).json({ success: false, message: "Rapper not found" });
+    }
+
+    // Aggregate battles for stats
+    const battles = await Battle.find({
+      $or: [{ rapper1: id }, { rapper2: id }]
+    }).select("winner status rapper1 rapper2 rapper1Votes rapper2Votes createdAt");
+
+    const totalBattles = battles.length;
+    const wins = battles.filter(b => b.winner?.toString() === id).length;
+    const losses = battles.filter(b => b.status === "completed" && b.winner && b.winner.toString() !== id).length;
+    const draws = battles.filter(b => b.status === "completed" && !b.winner).length;
+    const winRate = totalBattles ? Math.round((wins / totalBattles) * 100) : 0;
+    const activeBattles = battles.filter(b => b.status === "active").length;
+    const pendingBattles = battles.filter(b => b.status === "pending").length;
+    const completedBattles = battles.filter(b => b.status === "completed").length;
+
+    // Votes received
+    let votesReceived = 0;
+    battles.forEach(b => {
+      if (b.rapper1?.toString() === id) votesReceived += b.rapper1Votes || 0;
+      if (b.rapper2?.toString() === id) votesReceived += b.rapper2Votes || 0;
+    });
+
+    // Tier logic (example)
+    const tier = rapper.tier || (wins > 20 ? "Gold" : wins > 10 ? "Silver" : "Bronze");
+
+    // Ranking logic (can be improved)
+    const ranking = rapper.rank || 0;
+    const totalScore = rapper.score || votesReceived + wins * 10;
+
+    // Most frequent opponent (optional, efficient with aggregation)
+    // const opponentCounts = {};
+    // battles.forEach(b => {
+    //   const opp = b.rapper1?.toString() === id ? b.rapper2?.toString() : b.rapper1?.toString();
+    //   if (opp) opponentCounts[opp] = (opponentCounts[opp] || 0) + 1;
+    // });
+    // const mostFrequentOpponent = Object.entries(opponentCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        wins,
+        losses,
+        draws,
+        winRate,
+        ranking,
+        tier,
+        totalScore,
+        totalBattles,
+        activeBattles,
+        pendingBattles,
+        completedBattles,
+        votesReceived,
+        // mostFrequentOpponent,
+        // firstBattleDate: battles[0]?.createdAt,
+        // lastBattleDate: battles[totalBattles-1]?.createdAt,
+      },
+      rapper: {
+        id: rapper._id,
+        username: rapper.username,
+        fullName: rapper.fullName,
+        image: rapper.image,
+        joinedAt: rapper.createdAt,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch rapper stats",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+

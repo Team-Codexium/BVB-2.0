@@ -5,7 +5,8 @@ import {
   updateRapper,
   deleteRapper,
   getRapperProfile,
-  getLoggedInRapperProfile
+  getLoggedInRapperProfile,
+  getRapperStats
 } from '../controllers/rapper.controller.js';
 
 // Optionally, add authentication/authorization middleware as needed
@@ -30,5 +31,7 @@ router.delete('/:id', verifyRapperJWT, deleteRapper);
 
 // GET /api/rapper/profile (get profile of loggedin rapper)
 router.get('/profile', verifyRapperJWT, getLoggedInRapperProfile);
+
+router.get("/stats/:id", verifyRapperJWT, getRapperStats);
 
 export default router;
