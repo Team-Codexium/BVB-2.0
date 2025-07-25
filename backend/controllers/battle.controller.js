@@ -5,6 +5,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 export const createBattle = async (req, res) => {
   try {
     const { rapper2Id, battleTitle, timeLimit } = req.body;
+
     console.log(rapper2Id, battleTitle, timeLimit);
     console.log("create battle controller ");
     const rapper1Id = req.rapper._id;

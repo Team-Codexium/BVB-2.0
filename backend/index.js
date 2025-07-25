@@ -27,7 +27,7 @@ import battleRoutes from "./routes/battle.route.js"
 import rapperRoutes from "./routes/rapper.route.js"
 import mediaRoutes from "./routes/media.routes.js"
 import emailVerificationRoutes from "./routes/emailVerification.route.js"
-
+import voteRoutes from "./routes/vote.routes.js"
 
 
 //Routes
@@ -36,6 +36,7 @@ app.use("/api/battles", battleRoutes);
 app.use("/api/rappers", rapperRoutes);
 app.use("/api/media",mediaRoutes)
 app.use("/api/email-verification", emailVerificationRoutes)
+app.use("/api/vote",voteRoutes);
 
 
 

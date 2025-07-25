@@ -179,7 +179,7 @@ export default function BattleDetails() {
                 votedForThisRapper={userVote === rapper1?._id}
                 isContestant={user?._id === rapper1?._id}
                 battleStatus={battleStatus}
-                onVote={() => setUserVote(rapper1?._id)}
+                onVote={() => setUserVote(battleId,rapper1?._id,1)}
               />
             </CardContent>
           </Card>
@@ -211,7 +211,7 @@ export default function BattleDetails() {
                 votedForThisRapper={userVote === rapper2?._id}
                 isContestant={user?._id === rapper2?._id}
                 battleStatus={battleStatus}
-                onVote={() => setUserVote(rapper2?._id)}
+                onVote={() => setUserVote(battleId,rapper2?._id,2)}
               />
             </CardContent>
           </Card>

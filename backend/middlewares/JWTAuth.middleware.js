@@ -27,6 +27,7 @@ export const verifyRapperJWT = async(req, res, next) => {
 
 
   } catch (error) {
+    console.log("error comes in jwt auth middleware")
     return res.status(401).json({success: false, message: error.message});
   }
 }
