@@ -35,6 +35,7 @@ export default function BattleDetails() {
     console.log("User voted for rapper ID:", votedFor)
     setVotedRapperId(votedFor)
   }
+  console.log(battle)
   
   useEffect(() => {
     checkUserVote()
@@ -49,24 +50,28 @@ export default function BattleDetails() {
 
   // Function to calculate time remaining
   const calculateTimeRemaining = (endTime) => {
-    const now = new Date().getTime()
-    const end = new Date(endTime).getTime()
-    const timeDiff = end - now
+    const now = new Date().getTime();
+    const end = new Date(endTime).getTime();
+    console.log(now, end, endTime)
+    const timeDiff = end - now;
 
     if (timeDiff <= 0) {
-      return "Battle has ended"
+      return "Battle has ended";
     }
 
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
     if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''} and ${hours} hr${hours > 1 ? 's' : ''} remains`
+      return `${days} day${days > 1 ? 's' : ''}, ${hours} hr${hours > 1 ? 's' : ''}, ${minutes} min${minutes > 1 ? 's' : ''}`;
     } else if (hours > 0) {
-      return `${hours} hr${hours > 1 ? 's' : ''} and ${minutes} min${minutes > 1 ? 's' : ''} remains`
+      return `${hours} hr${hours > 1 ? 's' : ''}, ${minutes} min${minutes > 1 ? 's' : ''}`;
+    } else if (minutes > 0) {
+      return `${minutes} min${minutes > 1 ? 's' : ''}, ${seconds} sec${seconds > 1 ? 's' : ''}`;
     } else {
-      return `${minutes} min${minutes > 1 ? 's' : ''} remains`
+      return `${seconds} sec${seconds > 1 ? 's' : ''}`;
     }
   }
 
@@ -93,7 +98,7 @@ export default function BattleDetails() {
         }
       }
       setVoteTimerActive(false)
-    }, 6000) // 1 minute
+    }, 500) // 1 minute
 
     return () => clearTimeout(voteTimerRef.current)
   }, [voteTimerActive, votedRapperId, lastSyncedVote, battleId, token])
@@ -118,7 +123,7 @@ export default function BattleDetails() {
         setProgress(percent)
         
         // Calculate time remaining
-        const remaining = calculateTimeRemaining(battle.timeLimit)
+        const remaining = calculateTimeRemaining(battle.endTime)
         setTimeRemaining(remaining)
       }
 
@@ -222,7 +227,7 @@ export default function BattleDetails() {
             </CardHeader>
             <CardContent className="space-y-4">
               <TrackList
-                tracks={Array.isArray(battle?.rapper1_audio_urls) ? battle.rapper1_audio_urls : []}
+                tracks={Array.isArray(battle?.rapper1Tracks) ? battle.rapper1Tracks : []}
                 artist={rapper1?.username}
                 rapperId={rapper1?._id}
                 onTrackUpload={handleTrackUpload}

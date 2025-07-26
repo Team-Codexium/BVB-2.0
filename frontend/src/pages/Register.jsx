@@ -34,7 +34,7 @@ export default function Register() {
     e.preventDefault()
     try {
       await register(formData)
-      navigate('/dashboard')
+      navigate('/')
     } catch (error) {
       console.error('Error:', error)
     }

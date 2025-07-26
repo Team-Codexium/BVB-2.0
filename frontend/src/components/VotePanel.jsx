@@ -28,10 +28,10 @@ export default function VotingComponent({
       setLocalVotes(currentVotes + 1)
     } else if (prevVotedRapperId === rapperId && votedRapperId !== rapperId && votedRapperId !== null) {
       // Switched vote away from this rapper
-      setLocalVotes(currentVotes - 1)
+      setLocalVotes(currentVotes !== 0 ? currentVotes - 1 : 0)
     } else if (votedRapperId === null && prevVotedRapperId === rapperId) {
       // Unvoted this rapper
-      setLocalVotes(currentVotes - 1)
+      setLocalVotes(currentVotes !== 0 ? currentVotes - 1 : 0)
     } else {
       setLocalVotes(currentVotes)
     }
@@ -119,7 +119,7 @@ export default function VotingComponent({
             <div className="flex items-center justify-center gap-2 mb-2">
               <ThumbsUp className="w-6 h-6 text-purple-400 animate-bounce" />
               <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow">
-                {localVotes}
+                {Math.floor(localVotes/2)}
               </span>
             </div>
             <p className="text-sm text-gray-400">{localVotes === 1 ? "Vote" : "Votes"}</p>

@@ -25,23 +25,44 @@ const ExploreBattles = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState('createdAt');
   const [status, setStatus] = useState('');
-  // const navigate = useNavigate();
 
   useEffect(() => {
     const getBattles = async(token) => {
       await getAllBattles(token);
     }
     getBattles(token);
-  }, [])
+  }, [token])
 
-  console.log(battles)
-
+  // Filter battles based on status and user
   const filteredBattles = battles.filter(battle => {
     const rapper1Id = battle.rapper1?._id;
     const rapper2Id = battle.rapper2?._id;
-    return rapper1Id !== user._id && rapper2Id !== user._id && battle.status !== "pending";
-  })
+    // Only show battles where user is not a contestant and status matches
+    const notContestant = rapper1Id !== user._id && rapper2Id !== user._id;
+    const statusMatch = status === '' || battle.status?.toLowerCase() === status.toLowerCase();
+    return notContestant && statusMatch;
+  });
 
+  // Sort battles
+  const sortedBattles = [...filteredBattles].sort((a, b) => {
+    if (sort === 'createdAt') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    if (sort === 'votes') {
+      const aVotes = (a.rapper1Votes || 0) + (a.rapper2Votes || 0);
+      const bVotes = (b.rapper1Votes || 0) + (b.rapper2Votes || 0);
+      return bVotes - aVotes;
+    }
+    return 0;
+  });
+
+  // Pagination
+  useEffect(() => {
+    setTotalPages(Math.ceil(sortedBattles.length / PAGE_SIZE));
+    setPage(1);
+  }, [sortedBattles.length]);
+
+  const paginatedBattles = sortedBattles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleSortChange = (e) => {
     setSort(e.target.value);
@@ -79,7 +100,7 @@ const ExploreBattles = () => {
                   className="rounded-md bg-gray-900 border-yellow-400 px-3 py-2 text-yellow-400 font-orbitron"
                 >
                   {SORT_OPTIONS.map(opt => (
-                    <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option className='text-yellow-400' key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
@@ -92,7 +113,7 @@ const ExploreBattles = () => {
                   className="rounded-md bg-gray-900 border-yellow-400 px-3 py-2 text-yellow-400 font-orbitron"
                 >
                   {STATUS_OPTIONS.map(opt => (
-                    <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option className='text-yellow-400' key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
@@ -107,13 +128,13 @@ const ExploreBattles = () => {
                 <span className="text-red-400 font-orbitron">{error}</span>
               </div>
             )}
-            {!loading && !error && filteredBattles.length === 0 && (
+            {!loading && !error && paginatedBattles.length === 0 && (
               <div className="text-center text-gray-400 py-8 font-orbitron">
                 No battles found.
               </div>
             )}
             <div className="grid gap-8">
-              {filteredBattles.map((battle) => (
+              {paginatedBattles.map((battle) => (
                 <BattleCard key={battle._id} battle={battle} />
               ))}
             </div>

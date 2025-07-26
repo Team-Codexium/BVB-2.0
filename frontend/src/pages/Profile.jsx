@@ -156,7 +156,7 @@ const Profile = () => {
               <Button
                 variant="outline"
                 className="font-orbitron border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
-                onClick={() => navigate('/dashboard/mybattles')}
+                onClick={() => navigate('/my-battles')}
               >
                 See More
               </Button>

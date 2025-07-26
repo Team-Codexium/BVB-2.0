@@ -29,7 +29,7 @@ const Login = () => {
     try {
       const user = await login(formData.email, formData.password);
       setUser(user);
-      if (user) navigate('/dashboard');
+      if (user) navigate('/');
     } catch (err) {
       // Error is already handled by the context
       console.log(err);
