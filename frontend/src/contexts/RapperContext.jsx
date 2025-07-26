@@ -75,11 +75,26 @@ export const RapperProvider = ({ children }) => {
       console.log('Tracks fetched:', res);
       setTracks(res.data.audioUrls || []);
     } catch {
+      setTracks([]);
       setError('Failed to load tracks.');
     } finally {
       setLoading(false);
     }
   };
+
+  const checkVote = async (battleId) =>{
+    try {
+      const res = await axios.get(`${API_URL}/api/votes/check/${battleId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      console.log('Vote checked:', res);
+      return res.data.vote.votedfor || null;
+    } catch (error) {
+      console.error('Failed to check vote:', error);
+      setError('Failed to check vote.');
+      return null;
+    }
+  }
 
   // Fetch all rappers on mount
   useEffect(() => {
@@ -98,6 +113,7 @@ export const RapperProvider = ({ children }) => {
     tracks,
     fetchTracksByRapper,
     setTracks,
+    checkVote
   };
 
   return (

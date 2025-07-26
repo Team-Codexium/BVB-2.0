@@ -230,12 +230,12 @@ export const getAudioByRapper = async (req, res) => {
       ]
     });
 
-    if (!battles || battles.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No battles found for this rapper"
-      });
-    }
+    // if (!battles || battles.length === 0) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "No battles found for this rapper"
+    //   });
+    // }
 
     const audioUrls = battles.flatMap(battle => {
       if (battle.rapper1.toString() === rapperId) {

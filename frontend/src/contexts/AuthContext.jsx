@@ -189,6 +189,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
+    API_URL,
     user, setUser,
     token,
     loading,

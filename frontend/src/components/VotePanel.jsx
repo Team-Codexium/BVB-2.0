@@ -1,48 +1,64 @@
-"use client"
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ThumbsUp, Crown, Flame, Mic, Check, Lock } from "lucide-react"
+import { ThumbsUp, Crown, Flame, Mic, Check, Lock, Undo2 } from "lucide-react"
 
 
 export default function VotingComponent({
   rapperId,
   currentVotes,
-  hasVoted,
-  votedForThisRapper,
+  votedRapperId,
+  prevVotedRapperId,
+  setVotedRapperId,
   isContestant,
   battleStatus,
-  onVote,
+  voteTimerActive,
+  setVoteTimerActive
 }) {
   const [isAnimating, setIsAnimating] = useState(false)
+  const [localVotes, setLocalVotes] = useState(currentVotes)
+
+  useEffect(() => {
+    // Optimistic UI: update localVotes instantly based on local vote state
+    if (votedRapperId === rapperId && prevVotedRapperId !== rapperId && prevVotedRapperId !== null) {
+      // Switched vote from other rapper to this one
+      setLocalVotes(currentVotes + 1)
+    } else if (votedRapperId === rapperId && prevVotedRapperId === null) {
+      // First time voting for this rapper
+      setLocalVotes(currentVotes + 1)
+    } else if (prevVotedRapperId === rapperId && votedRapperId !== rapperId && votedRapperId !== null) {
+      // Switched vote away from this rapper
+      setLocalVotes(currentVotes - 1)
+    } else if (votedRapperId === null && prevVotedRapperId === rapperId) {
+      // Unvoted this rapper
+      setLocalVotes(currentVotes - 1)
+    } else {
+      setLocalVotes(currentVotes)
+    }
+  }, [currentVotes, votedRapperId, prevVotedRapperId, rapperId])
+
+  const canVote = !isContestant && battleStatus === "active"
+  const isDisabled = isContestant || battleStatus !== "active"
 
   const handleVote = () => {
-    if (canVote) {
-      setIsAnimating(true)
-      onVote(rapperId)
-      setTimeout(() => setIsAnimating(false), 600)
+    if (!canVote) return
+    setIsAnimating(true)
+    // If already voted for this rapper, unvote
+    if (votedRapperId === rapperId) {
+      setVotedRapperId(null)
+    } else {
+      setVotedRapperId(rapperId)
     }
+    if (!voteTimerActive) setVoteTimerActive(true)
+    setTimeout(() => setIsAnimating(false), 600)
   }
 
-  const canVote = !hasVoted && !isContestant && battleStatus === "active"
-  const isDisabled = hasVoted || isContestant || battleStatus !== "active"
-
   const getButtonContent = () => {
-    if (votedForThisRapper) {
+    if (votedRapperId === rapperId) {
       return (
         <>
           <Check className="w-4 h-4" />
           You Voted Here
-        </>
-      )
-    }
-
-    if (hasVoted && !votedForThisRapper) {
-      return (
-        <>
-          <Lock className="w-4 h-4" />
-          Vote Cast
         </>
       )
     }
@@ -83,12 +99,8 @@ export default function VotingComponent({
   }
 
   const getButtonStyles = () => {
-    if (votedForThisRapper) {
+    if (votedRapperId === rapperId) {
       return "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-purple-500 shadow-lg shadow-purple-500/25"
-    }
-
-    if (hasVoted && !votedForThisRapper) {
-      return "bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed"
     }
 
     if (isDisabled) {
@@ -107,10 +119,10 @@ export default function VotingComponent({
             <div className="flex items-center justify-center gap-2 mb-2">
               <ThumbsUp className="w-6 h-6 text-purple-400 animate-bounce" />
               <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow">
-                {currentVotes}
+                {localVotes}
               </span>
             </div>
-            <p className="text-sm text-gray-400">{currentVotes === 1 ? "Vote" : "Votes"}</p>
+            <p className="text-sm text-gray-400">{localVotes === 1 ? "Vote" : "Votes"}</p>
           </div>
 
           {/* Voting Button */}
@@ -125,17 +137,10 @@ export default function VotingComponent({
           </Button>
 
           {/* Status Indicator */}
-          {votedForThisRapper && (
+          {votedRapperId === rapperId && (
             <div className="flex items-center justify-center gap-2 text-xs text-purple-400 animate-fade-in">
               <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
               Your vote is locked in!
-            </div>
-          )}
-
-          {hasVoted && !votedForThisRapper && (
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-              You voted for the other rapper
             </div>
           )}
 

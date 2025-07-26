@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar } from "lucide-react"
@@ -9,18 +9,40 @@ import {TrackList,VotingComponent} from "../components"
 import axios from "axios"
 import { Alert } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
+import { useRapper } from "../contexts/RapperContext"
 
 export default function BattleDetails() {
   const [loading, setLoading] = useState(false)
   const [alertMsg, setAlertMsg] = useState("")
-  const [userVote, setUserVote] = useState(null)
   const [progress, setProgress] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState("")
+  const [votedRapperId, setVotedRapperId] = useState(null);
+  const [prevVotedRapperId, setPrevVotedRapperId] = useState(null);
+  const [lastSyncedVote, setLastSyncedVote] = useState(null)
+  const [voteTimerActive, setVoteTimerActive] = useState(false)
+  
+  const voteTimerRef = useRef(null)
 
   const { battleId } = useParams()
   const { getBattleById, battle } = useBattle()
-  const { token, user } = useAuth()
-  console.log("battle in Battle deatail = ",battle);
+  const { token, user, API_URL: url } = useAuth()
+  const { checkVote } = useRapper();
+
+
+
+  const checkUserVote = async () => {
+    const votedFor = await checkVote(battleId)
+    console.log("User voted for rapper ID:", votedFor)
+    setVotedRapperId(votedFor)
+  }
+  
+  useEffect(() => {
+    checkUserVote()
+  }, [battleId])
+
+
+
+  // Function to fetch battle details
   const refreshBattle = () => {
     getBattleById(battleId, token)
   }
@@ -48,10 +70,42 @@ export default function BattleDetails() {
     }
   }
 
+  //Get votedFor rapper
+
+
+  // Sync vote status every 1 minute
+    useEffect(() => {
+    if (!voteTimerActive) return
+    voteTimerRef.current = setTimeout(async () => {
+      if (votedRapperId !== lastSyncedVote) {
+        try {
+          const res = await axios.post(`${url}/api/votes/${battleId}`, {
+            rapperId: votedRapperId,
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          console.log("Vote response:", res.data)
+          setLastSyncedVote(votedRapperId)
+          setAlertMsg("Vote submitted!")
+          refreshBattle()
+        } catch {
+          setAlertMsg("Failed to submit vote.")
+        }
+      }
+      setVoteTimerActive(false)
+    }, 6000) // 1 minute
+
+    return () => clearTimeout(voteTimerRef.current)
+  }, [voteTimerActive, votedRapperId, lastSyncedVote, battleId, token])
+
+
+  //Calling refreshBattle on mount and when battleId or token changes
   useEffect(() => {
     refreshBattle()
   }, [battleId, token])
 
+
+  // Update progress and time remaining every minute
   useEffect(() => {
     if (battle?.timeLimit) {
       const updateTimeAndProgress = () => {
@@ -107,6 +161,11 @@ export default function BattleDetails() {
       setAlertMsg("Failed to upload track.")
     }
   }
+
+  const handleVote = (rapperId) => {
+    setPrevVotedRapperId(votedRapperId);
+    setVotedRapperId(prev => prev === rapperId ? null : rapperId);
+  };
 
   if (loading || !battle?.rapper1 || !battle?.rapper2) {
     return (
@@ -173,13 +232,14 @@ export default function BattleDetails() {
 
               <VotingComponent
                 rapperId={rapper1?._id}
-                rapperName={rapper1?.username}
                 currentVotes={votes.rapper1}
-                hasVoted={userVote !== null}
-                votedForThisRapper={userVote === rapper1?._id}
+                votedRapperId={votedRapperId}
+                prevVotedRapperId={prevVotedRapperId}
+                setVotedRapperId={handleVote}
                 isContestant={user?._id === rapper1?._id}
                 battleStatus={battleStatus}
-                onVote={() => setUserVote(battleId,rapper1?._id,1)}
+                voteTimerActive={voteTimerActive}
+                setVoteTimerActive={setVoteTimerActive}
               />
             </CardContent>
           </Card>
@@ -205,13 +265,14 @@ export default function BattleDetails() {
 
               <VotingComponent
                 rapperId={rapper2?._id}
-                rapperName={rapper2?.username}
                 currentVotes={votes.rapper2}
-                hasVoted={userVote !== null}
-                votedForThisRapper={userVote === rapper2?._id}
+                votedRapperId={votedRapperId}
+                prevVotedRapperId={prevVotedRapperId}
+                setVotedRapperId={handleVote}
                 isContestant={user?._id === rapper2?._id}
                 battleStatus={battleStatus}
-                onVote={() => setUserVote(battleId,rapper2?._id,2)}
+                voteTimerActive={voteTimerActive}
+                setVoteTimerActive={setVoteTimerActive}
               />
             </CardContent>
           </Card>

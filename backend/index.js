@@ -36,7 +36,7 @@ app.use("/api/battles", battleRoutes);
 app.use("/api/rappers", rapperRoutes);
 app.use("/api/media",mediaRoutes)
 app.use("/api/email-verification", emailVerificationRoutes)
-app.use("/api/vote",voteRoutes);
+app.use("/api/votes",voteRoutes);
 
 
 

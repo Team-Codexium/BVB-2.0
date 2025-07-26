@@ -19,5 +19,5 @@ createRoot(document.getElementById('root')).render(
         </RapperProvider>
       </BattleProvider>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 )
