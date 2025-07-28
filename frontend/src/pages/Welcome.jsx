@@ -165,13 +165,13 @@ const Welcome = () => {
 
         {/* Quick Actions */}
         <div className="flex flex-col md:flex-row gap-8 justify-center mb-12">
-          <Button className="font-orbitron bg-yellow-400 text-black border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-500 hover:text-black transition-all duration-200">
+          <Button className="font-orbitron bg-yellow-400 text-black border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-600 hover:text-black transition-all duration-200 cursor-pointer" onClick={()=>navigate("/artists")}>
             Start New Battle
           </Button>
-          <Button className="font-orbitron bg-pink-400 text-black border-2 border-pink-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-pink-500 hover:text-black transition-all duration-200">
+          {/* <Button className="font-orbitron bg-pink-400 text-black border-2 border-pink-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-pink-500 hover:text-black transition-all duration-200">
             Upload Track
-          </Button>
-          <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200">
+          </Button> */}
+          <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200 cursor-pointer" onClick={()=>navigate("/explore-battle")}>
             Explore Battles
           </Button>
         </div>
