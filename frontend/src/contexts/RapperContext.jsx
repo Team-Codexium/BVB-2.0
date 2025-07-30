@@ -16,14 +16,13 @@ export const RapperProvider = ({ children }) => {
   const [stats, setStats] = useState([]);
   const [tracks, setTracks] = useState([]);
 
-  const API_URL = 'http://localhost:4000';
-
   // Fetch all rappers
   const fetchRappers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/api/rappers`);
+      const res = await axios.get(`/api/rappers`);
+      console.log(res)
       setRappers(res.data.data);
     } catch {
       setError('Failed to load rappers.');
@@ -37,7 +36,7 @@ export const RapperProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/api/rappers/${id}`);
+      const res = await axios.get(`/api/rappers/${id}`);
       console.log('Rapper fetched:', res);
       // if (!res.data.success) {
       return res.data;
@@ -51,8 +50,7 @@ export const RapperProvider = ({ children }) => {
 
   const fetchRapperDetails = async (id) => {
     try {
-      const res = await axios.get(`${API_URL}/api/rappers/stats/${id}`);
-      // console.log('Stats fetched:', res);
+      const res = await axios.get(`/api/rappers/stats/${id}`);
       if (res.data.success) {
         setStats(res.data.stats);
       } else {
@@ -71,7 +69,7 @@ export const RapperProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API_URL}/api/media/${rapperId}`);
+      const res = await axios.get(`/api/media/${rapperId}`);
       console.log('Tracks fetched:', res);
       setTracks(res.data.audioUrls || []);
     } catch {
@@ -82,13 +80,15 @@ export const RapperProvider = ({ children }) => {
     }
   };
 
+  // 
   const checkVote = async (battleId) =>{
     try {
-      const res = await axios.get(`${API_URL}/api/votes/check/${battleId}`, {
+      const res = await axios.get(`/api/votes/check/${battleId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       console.log('Vote checked:', res);
-      return res.data.vote.votedfor || null;
+      if(res) return null;
+      return res?.data.vote.votedfor;
     } catch (error) {
       console.error('Failed to check vote:', error);
       setError('Failed to check vote.');

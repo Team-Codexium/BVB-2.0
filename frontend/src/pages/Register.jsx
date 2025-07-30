@@ -28,7 +28,6 @@ export default function Register() {
   const [emailSuccess, setEmailSuccess] = useState('');
   const [popup, setPopup] = useState({ show: false, message: "", type: "info" })
 
-  const API_URL = 'http://localhost:4000';
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -59,7 +58,7 @@ export default function Register() {
     setEmailError('');
     setEmailSuccess('');
     try {
-      const response = await axios.post(`${API_URL}/api/email-verification/send-otp`, {
+      const response = await axios.post(`/api/email-verification/send-otp`, {
         email: formData.email
       });
       if (response.data.success) {

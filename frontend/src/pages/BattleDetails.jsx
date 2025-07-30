@@ -25,7 +25,7 @@ export default function BattleDetails() {
 
   const { battleId } = useParams()
   const { getBattleById, battle } = useBattle()
-  const { token, user, API_URL: url } = useAuth()
+  const { token, user} = useAuth()
   const { checkVote } = useRapper();
 
 
@@ -35,7 +35,7 @@ export default function BattleDetails() {
     console.log("User voted for rapper ID:", votedFor)
     setVotedRapperId(votedFor)
   }
-  console.log(battle)
+
   
   useEffect(() => {
     checkUserVote()
@@ -84,7 +84,7 @@ export default function BattleDetails() {
     voteTimerRef.current = setTimeout(async () => {
       if (votedRapperId !== lastSyncedVote) {
         try {
-          const res = await axios.post(`${url}/api/votes/${battleId}`, {
+          const res = await axios.post(`/api/votes/${battleId}`, {
             rapperId: votedRapperId,
           }, {
             headers: { Authorization: `Bearer ${token}` }
@@ -156,7 +156,7 @@ export default function BattleDetails() {
 
     try {
       await axios.post(
-        `http://localhost:4000/api/media/${battleId}/${rapperId}/add-audio`,
+        `/api/media/${battleId}/${rapperId}/add-audio`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       )

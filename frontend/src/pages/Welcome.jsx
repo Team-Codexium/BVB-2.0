@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,12 +11,31 @@ import { Search, Users, Swords, Bell, Trophy, Target, Zap, TrendingUp, Crown, Fl
 import { useAuth } from "../contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
 
+import { useBattle } from "../contexts/BattleContext"
+
+
 const Welcome = () => {
   // const [searchQuery, setSearchQuery] = useState("")
   const [notificationOpen, setNotificationOpen] = useState(false)
-  const { user } = useAuth();
+  const { user,token } = useAuth();
+  const { battles, loading, getBattleByRapperId } = useBattle();
+    const [localLoading, setLocalLoading] = useState(true);
   const navigate = useNavigate();
 
+   // Fetch user's battles on mount
+    useEffect(() => {
+      const fetch = async () => {
+        if (user?._id && token) {
+          setLocalLoading(true);
+          await getBattleByRapperId(user._id, token);
+          setLocalLoading(false);
+        }
+      };
+      fetch();
+      // eslint-disable-next-line
+    }, [user?._id, token]);
+// console.log(battles);
+// console.log(user)
   const notifications = [
     {
       id: 1,
@@ -44,55 +63,32 @@ const Welcome = () => {
     },
   ]
 
+const winCount = battles.filter(battle => battle.winner === user._id).length;
   const battleStats = [
     {
-      title: "Total Battles",
-      value: "127",
-      change: "+12",
-      changeType: "positive",
+      title: "Wins",
+      value: `${winCount} / ${battles.length}`,
+      // change: "+12",
+      // changeType: "positive",
       icon: Swords,
       color: "text-blue-600",
     },
     {
-      title: "Win Rate",
-      value: "78%",
-      change: "+5%",
-      changeType: "positive",
-      icon: Trophy,
+      title: "Rank",
+      value: user.rank,
+      // change: "+5%",
+      // changeType: "positive",
+      icon: Crown,
       color: "text-yellow-600",
     },
     {
-      title: "Current Streak",
-      value: "8",
-      change: "+3",
-      changeType: "positive",
-      icon: Flame,
-      color: "text-red-600",
-    },
-    {
-      title: "Ranking",
-      value: "#42",
-      change: "+7",
-      changeType: "positive",
-      icon: Crown,
-      color: "text-purple-600",
-    },
-    {
       title: "Total Score",
-      value: "2,847",
-      change: "+156",
-      changeType: "positive",
-      icon: Star,
-      color: "text-green-600",
-    },
-    {
-      title: "Accuracy",
-      value: "94%",
-      change: "+2%",
-      changeType: "positive",
-      icon: Target,
-      color: "text-indigo-600",
-    },
+      value: user.score,
+      // change: "+3",
+      // changeType: "positive",
+      icon: Crown,
+      color: "text-red-600",
+    }
   ]
 
   const unreadCount = notifications.filter((n) => n.unread).length
@@ -119,7 +115,7 @@ const Welcome = () => {
           </Avatar>
           <div className="flex-1">
             <h2 className="text-3xl font-bold font-orbitron text-yellow-400 mb-2 glitch">Welcome back, {user?.fullName} 🎤</h2>
-            <p className="text-gray-200 font-orbitron mb-2">Rank: <span className="text-pink-400 font-bold">{user?.rank || "Rookie"}</span></p>
+            <p className="text-gray-200 font-orbitron mb-2">Tier: <span className="text-pink-400 font-bold">{user?.tier || "Rookie"}</span></p>
             <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-6 py-2 font-bold shadow hover:bg-yellow-400 hover:text-black transition-all duration-200 rounded-lg" onClick={() => navigate("/profile")}>
               View Profile
             </Button>
@@ -189,17 +185,7 @@ const Welcome = () => {
                 <CardContent>
                   <div className="flex items-baseline gap-2">
                     <div className="text-2xl font-bold font-orbitron text-white">{stat.value}</div>
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs font-orbitron ${
-                        stat.changeType === "positive"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                      }`}
-                    >
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      {stat.change}
-                    </Badge>
+                   
                   </div>
                 </CardContent>
               </Card>
@@ -213,45 +199,31 @@ const Welcome = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-orbitron text-pink-400">
                 <Flame className="w-5 h-5 text-pink-400" />
-                Recent Battle Activity
+                Recent Battles
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-900/30 rounded-lg">
+                {
+                  battles.map((battle,index)=>{
+                    if(battle.status !=="pending"){
+                       return (  <div key={index} className={`flex items-center justify-between p-4 ${ battle.winner?._id === user._id ? 
+                    " bg-green-900/30" :  "bg-red-900/30"
+                   }  rounded-lg`}>
                   <div className="flex items-center gap-3">
                     <Trophy className="w-5 h-5 text-yellow-400" />
                     <div>
-                      <p className="font-orbitron font-bold text-white">Victory against DJ Vortex</p>
-                      <p className="text-sm text-gray-400">Hip-Hop Battle • 2 hours ago</p>
+                      <p className="font-orbitron font-bold text-white">{battle.title.toUpperCase()}</p>
+                      <p className="text-sm text-gray-400">Time Duration {battle.timeLimit} Days</p>
                     </div>
                   </div>
-                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 font-orbitron">+25 XP</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-blue-900/30 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Swords className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <p className="font-orbitron font-bold text-white">Battle with MC Thunder</p>
-                      <p className="text-sm text-gray-400">Freestyle Battle • 5 hours ago</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 font-orbitron">+18 XP</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-purple-900/30 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Crown className="w-5 h-5 text-purple-400" />
-                    <div>
-                      <p className="font-orbitron font-bold text-white">Ranked up to Gold Tier</p>
-                      <p className="text-sm text-gray-400">Achievement unlocked • 1 day ago</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 font-orbitron">
-                    +50 XP
-                  </Badge>
-                </div>
+                  {/* <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 font-orbitron">+25 XP</Badge> */}
+                </div>)
+                    }
+                  
+                  })
+                }
+                
               </div>
             </CardContent>
           </Card>

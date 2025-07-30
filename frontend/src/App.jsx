@@ -37,6 +37,8 @@ const App = () => {
 
         {/* Catch all route - redirects to root */}
         <Route path="*" element={<Navigate to="/" replace />} />
+     
+         
       </Routes>
     </div>
   )

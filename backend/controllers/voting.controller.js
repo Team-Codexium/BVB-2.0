@@ -78,15 +78,17 @@ export const addVote = async (req, res) => {
 export const checkVote = async (req, res) => {
   try {
     const { battleId } = req.params;
+    console.log("battle id in check vote controller",battleId);
     const voterId = req.rapper._id;
+    console.log("voterid = ",voterId);
     if (!battleId) {
       return res.status(400).json({ success: false, message: "Invalid input" });
     }
 
     const vote = await Vote.findOne({ battleId, voterId }).populate("voterId", "name");
-    if (!vote) {
-      return res.status(404).json({ success: false, message: "Vote not found" });
-    }
+    // if (!vote) {
+    //   return res.status(200).json({ success: true, message: "Vote not found" ,vote});
+    // }
 
     return res.status(200).json({
       success: true,

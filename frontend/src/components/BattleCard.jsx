@@ -19,7 +19,7 @@ const BattleCard = ({ battle }) => {
     const v1 = battle.rapper1Votes ?? 0;
     const v2 = battle.rapper2Votes ?? 0;
     const leading = v1 === v2 ? null : v1 > v2 ? 'r1' : 'r2';
-    console.log(r1, r2);
+    // console.log(r1, r2);
     const handleAccept = async (e) => {
         e.stopPropagation();
         if (!token || !battle._id) return;

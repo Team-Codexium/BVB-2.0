@@ -36,24 +36,26 @@ const Rappers = () => {
   const { createBattle } = useBattle();
   const { token, user } = useAuth();
 
-  const navigate = useNavigate();
+  
 
+  const navigate = useNavigate();
+  console.log("Raaper",rappers)
   useEffect(() => {
     // Filter rappers by search
     let filteredRappers = rappers;
     if (search.trim()) {
       const s = search.trim().toLowerCase();
-      filteredRappers = rappers.filter(
+      filteredRappers = rappers?.filter(
         (a) =>
-          (a.username && a.username.toLowerCase().includes(s)) ||
-          (a.fullName && a.fullName.toLowerCase().includes(s))
+          (a.username && a.username?.toLowerCase().includes(s)) ||
+          (a.fullName && a.fullName?.toLowerCase().includes(s))
       );
     }
     setFiltered(filteredRappers);
     setPage(1); // Reset to first page on search
   }, [search, rappers]);
 
-  const filteredRappers = filtered.filter((rapper) => rapper._id != user._id);
+  const filteredRappers = filtered?.filter((rapper) => rapper._id != user._id);
 
   // Pagination
   const totalPages = Math.ceil(filteredRappers.length / PAGE_SIZE) || 1;
@@ -127,10 +129,10 @@ const Rappers = () => {
                     />
                     <div>
                       <CardTitle className="text-xl font-orbitron text-yellow-400">
-                        {rapper.fullName || rapper.username}
+                        {rapper.username || rapper.fullName}
                       </CardTitle>
                       <div className="text-pink-400 font-orbitron text-sm">
-                        @{rapper.username}
+                        @{rapper.fullName}
                       </div>
                     </div>
                   </CardHeader>

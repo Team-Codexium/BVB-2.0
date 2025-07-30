@@ -16,8 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
-  const API_URL = 'http://localhost:4000';
-
   // Keep token in sync with localStorage
   useEffect(() => {
     if (token) {
@@ -55,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   const sendOTP = async (email) => {
     try {
       clearErrors();
-      const res = await axios.post(`${API_URL}/api/email-verification/send-otp`, { email });
+      const res = await axios.post(`/api/email-verification/send-otp`, { email });
       return res.data;
     } catch (err) {
       handleApiError(err);
@@ -65,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   const verifyOTP = async (email, otp) => {
     try {
       clearErrors();
-      const res = await axios.post(`${API_URL}/api/email-verification/verify-otp`, { email, otp });
+      const res = await axios.post(`/api/email-verification/verify-otp`, { email, otp });
       return res.data;
     } catch (err) {
       handleApiError(err);
@@ -75,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   const resendOTP = async (email) => {
     try {
       clearErrors();
-      const res = await axios.post(`${API_URL}/api/email-verification/resend-otp`, { email });
+      const res = await axios.post(`/api/email-verification/resend-otp`, { email });
       return res.data;
     } catch (err) {
       handleApiError(err);
@@ -85,7 +83,7 @@ export const AuthProvider = ({ children }) => {
   const checkEmailVerification = async (email) => {
     try {
       clearErrors();
-      const res = await axios.get(`${API_URL}/api/email-verification/check/${email}`);
+      const res = await axios.get(`/api/email-verification/check/${email}`);
       return res.data;
     } catch (err) {
       handleApiError(err);
@@ -97,7 +95,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       clearErrors();
-      const res = await axios.post(`${API_URL}/api/auth/register-rapper`, userData);
+      const res = await axios.post(`/api/auth/register-rapper`, userData);
       const { rapper, accessToken } = res.data;
       setToken(accessToken);
       setUser(rapper);
@@ -114,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       clearErrors();
-      const res = await axios.post(`${API_URL}/api/auth/login-rapper`, { email, password });
+      const res = await axios.post(`/api/auth/login-rapper`, { email, password });
       const { rapper, token: loginToken } = res.data;
       setToken(loginToken);
       setUser(rapper);
@@ -131,10 +129,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       clearErrors();
-      await axios.post(`${API_URL}/api/auth/logout-rapper`);
+      await axios.post(`/api/auth/logout-rapper`);
       setToken(null);
       setUser(null);
       localStorage.removeItem("token");
+      
     } catch (err) {
       handleApiError(err);
     } finally {
@@ -148,7 +147,7 @@ export const AuthProvider = ({ children }) => {
     try {
       clearErrors();
       if (!token) return null;
-      const res = await axios.get(`${API_URL}/api/auth/current-rapper`);
+      const res = await axios.get(`/api/auth/current-rapper`);
       const { rapper } = res.data;
       setUser(rapper);
       return rapper;
@@ -178,7 +177,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = async(formData) => {
     setLoading(true);
     try {
-      const response = await axios.patch(`${API_URL}/api/rappers/update`, formData, {headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.patch(`/api/rappers/update`, formData, {headers: { Authorization: `Bearer ${token}` } });
       console.log(response)
       setUser(response.data.rapper);
       setLoading(false);
@@ -189,7 +188,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    API_URL,
     user, setUser,
     token,
     loading,

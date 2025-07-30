@@ -1,6 +1,6 @@
 import React from 'react'
 import { Features, Footer, Header, Hero } from '../components'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate,Link } from 'react-router-dom'
 import Register from './Register'
 import Login from './Login'
 import EmailVerificationPage from './EmailVerificationPage'
@@ -31,6 +31,7 @@ const trendingBattles = [
 ]
 
 const Home = () => {
+  const navigate = useNavigate()
   const {user} = useAuth();
   return (
     <div className='bg-gradient-to-br from-purple-900 via-black to-pink-900 min-h-screen overflow-hidden relative'>
@@ -100,12 +101,16 @@ const Home = () => {
                   Join the hottest rap battle platform. Upload your tracks, challenge the best, and let the crowd decide your fate!
                 </p>
                 <div className="flex flex-col md:flex-row gap-6 justify-center">
-                  <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200">
+                  <Link to="/explore-battle" replace>
+                  <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200 cursor-pointer" onClick={()=> navigate('/explore-battle')}>
                     Explore Battles
                   </Button>
+                  </Link>
+                  <Link to="/login">
                   <Button className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200">
                     Join Now
                   </Button>
+                  </Link>
                 </div>
               </div>
             </section>
@@ -139,8 +144,9 @@ const Home = () => {
           </>
         } />
         
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+     
+           <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+           <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register/>} />
         <Route path="/email-verification" element={<EmailVerificationPage />} />
       </Routes>
       <Footer />

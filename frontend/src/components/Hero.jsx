@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 
@@ -18,6 +19,7 @@ const glitchText = {
 }
 
 const Hero = () => {
+
   return (
     <div className="relative min-h-[70vh] flex flex-col md:flex-row items-center justify-center overflow-hidden px-4 py-8 md:py-0">
       {/* Left: Bigger Image */}
@@ -58,18 +60,22 @@ const Hero = () => {
           <br />Are you ready to battle for the top spot?
         </p>
         <div className="flex flex-col md:flex-row gap-4 mt-2 w-full md:w-auto justify-center md:justify-start">
-          <Button
+         <Link to="/explore-battle">
+          <Button 
             className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-base md:text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200 w-full md:w-auto"
             style={{ fontFamily: "'Orbitron', 'Roboto Mono', monospace" }}
           >
             Explore Battles
           </Button>
+          </Link>
+          <Link to="/login">
           <Button
             className="font-orbitron bg-gray-900 text-yellow-400 border-2 border-yellow-400 px-8 py-3 text-base md:text-lg font-bold shadow-lg hover:bg-yellow-400 hover:text-black transition-all duration-200 w-full md:w-auto"
             style={{ fontFamily: "'Orbitron', 'Roboto Mono', monospace" }}
-          >
+            >
             Join Now
           </Button>
+            </Link>
         </div>
       </motion.div>
 

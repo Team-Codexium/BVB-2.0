@@ -75,18 +75,24 @@ const Navbar = () => {
 
         {/* Links (desktop) */}
         <div className="items-center gap-4 hidden md:flex">
-          <Button variant="ghost" size="sm" className="gap-2 font-orbitron text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-400">
+            <Link to="/artists">
+          <Button variant="ghost" size="sm" className="cursor-pointer gap-2 font-orbitron text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-400">
             <Users className="w-5 h-5" />
-            <Link to="/artists">Artists</Link>
+            Artists
           </Button>
-          <Button size="sm" className="gap-2 font-orbitron bg-yellow-400 text-black border-2 border-yellow-400 hover:bg-yellow-500 hover:text-black">
+            </Link>
+            <Link to="/explore-battle">
+          <Button size="sm" className="gap-2 font-orbitron bg-yellow-400 text-black border-2 border-yellow-400 hover:bg-yellow-500 hover:text-black cursor-pointer">
             <Swords className="w-5 h-5" />
-            <Link to="/explore-battle">Battles</Link>
+            Battles
           </Button>
-          <Button variant="ghost" size="sm" className="gap-2 font-orbitron text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-400">
+            </Link>
+            <Link to="/my-battles">
+          <Button variant="ghost" size="sm" className="gap-2 font-orbitron text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-400 cursor-pointer">
             <Shield className="w-5 h-5" />
-            <Link to="/my-battles">My Battles</Link>
+            My Battles
           </Button>
+            </Link>
           {/* Notifications */}
 
 
@@ -134,7 +140,7 @@ const Navbar = () => {
           {/* Profile & Logout */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Avatar className="w-8 h-8 border-2 border-yellow-400">
+              <Avatar className="w-8 h-8 border-2 border-yellow-400 cursor-pointer">
                 <AvatarImage src={user?.image} />
                 <AvatarFallback>{(user?.fullName || '?')[0].toUpperCase()}</AvatarFallback>
               </Avatar>
@@ -142,7 +148,7 @@ const Navbar = () => {
             <DropdownMenuContent className="bg-black/90 border-yellow-400 rounded-xl font-orbitron">
               <DropdownMenuLabel className="text-yellow-400">My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-yellow-400" onClick={() => navigate("/profile")}>
+              <DropdownMenuItem className="text-yellow-400 cursor-pointer" onClick={() => navigate("/profile")}>
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem className="text-yellow-400" onClick={logout}>
@@ -162,27 +168,27 @@ const Navbar = () => {
             <DropdownMenuContent className="bg-black/90 border-yellow-400 rounded-xl font-orbitron">
               <DropdownMenuLabel className="text-yellow-400">Menu</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/artists")}>
-                <Users className="w-5 h-5 mr-2" /> Artists
+              <DropdownMenuItem className="text-yellow-400" onClick={() => navigate("/artists")}>
+                <Users className="w-5 h-5 mr-2 text-yellow-400" /> Artists 
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/explore-battle")}>
-                <Swords className="w-5 h-5 mr-2" /> Battles
+              <DropdownMenuItem className="text-yellow-400" onClick={() => navigate("/explore-battle")}>
+                <Swords className="w-5 h-5 mr-2 text-yellow-400" /> Battles
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/my-battles")}>
-                <Shield className="w-5 h-5 mr-2" /> My Battles
+              <DropdownMenuItem className="text-yellow-400" onClick={() => navigate("/my-battles")}>
+                <Shield className="w-5 h-5 mr-2 text-yellow-400"  /> My Battles
               </DropdownMenuItem>
               {/* <DropdownMenuItem onClick={() => setNotificationOpen(true)}>
                 <Bell className="w-5 h-5 mr-2" /> Notifications
               </DropdownMenuItem> */}
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
-                <Avatar className="w-6 h-6 mr-2 border-2 border-yellow-400">
+              <DropdownMenuItem className="text-yellow-400" onClick={() => navigate("/profile")}>
+                <Avatar className="w-6 h-6 mr-2 border-2">
                   <AvatarImage src={user?.image} />
                   <AvatarFallback>{(user?.fullName || '?')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={logout}>
-                <LogOut className="w-5 h-5 mr-2" /> Logout
+              <DropdownMenuItem className="text-yellow-400" onClick={logout}>
+                <LogOut className="w-5 h-5 mr-2 text-yellow-400" /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

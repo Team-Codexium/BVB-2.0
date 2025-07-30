@@ -16,7 +16,6 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }) => {
   const [countdown, setCountdown] = useState(0)
   const [popup, setPopup] = useState({ show: false, message: "", type: "info" })
 
-  const API_URL = 'http://localhost:4000'
 
   useEffect(() => {
     if (countdown > 0) {
@@ -57,7 +56,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }) => {
     setLoading(true)
     setError('')
     try {
-      const response = await axios.post(`${API_URL}/api/email-verification/verify-otp`, {
+      const response = await axios.post(`/api/email-verification/verify-otp`, {
         email,
         otp: otpString
       })
@@ -78,7 +77,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBack }) => {
     setResendLoading(true)
     setError('')
     try {
-      const response = await axios.post(`${API_URL}/api/email-verification/resend-otp`, {
+      const response = await axios.post(`/api/email-verification/resend-otp`, {
         email
       })
       if (response.data.success) {

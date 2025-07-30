@@ -12,13 +12,15 @@ import MyBattles from './MyBattles'
 import RapperProfile from './RapperProfile'
 
 
+
 const DashBoard = () => {
+
   return (
     <div>
       {/* <AppSidebar /> */}
      
-        <Navbar />
-   
+       
+      <Navbar/>
         
       <Routes>
        
