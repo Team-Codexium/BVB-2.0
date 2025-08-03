@@ -2,15 +2,17 @@ import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import cookieParser from 'cookie-parser'
-
+import http from "http"
 import connectDB from './config/mongodb.js'
+import { initSocket } from './socket.js'
 // app config
 const app = express()
 const port = process.env.PORT || 4000
 connectDB() // connecting database
 import { connectCloudinary } from './config/connectCloudinary.js'
 connectCloudinary();
-
+const server=http.createServer(app);
+initSocket(server);
 
 // middlewares
 app.use(express.json())
@@ -40,6 +42,6 @@ app.use("/api/votes",voteRoutes);
 
 
 
-app.listen(port, ()=>{
+server.listen(port, ()=>{
     console.log(`Server running on ${port}`); 
 })

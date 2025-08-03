@@ -10,6 +10,7 @@ import axios from "axios"
 import { Alert } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { useRapper } from "../contexts/RapperContext"
+import socket from "../../clientScoket"
 
 export default function BattleDetails() {
   const [loading, setLoading] = useState(false)
@@ -22,18 +23,56 @@ export default function BattleDetails() {
   const [voteTimerActive, setVoteTimerActive] = useState(false)
   
   const voteTimerRef = useRef(null)
-
+  
   const { battleId } = useParams()
   const { getBattleById, battle } = useBattle()
   const { token, user} = useAuth()
   const { checkVote } = useRapper();
+  
+  
+  useEffect(() => {
+    // Join battle room for real-time updates
+    if (battleId) {
+      socket.emit("join-battle", battleId);
+      console.log("Joined battle room:", battleId);
+    }
 
+    // Listen for vote updates
+    socket.on("vote-update", (data) => {
+      console.log("Live vote update received:", data);
+      console.log("Current votes before update:", votes);
+      
+      handleVoteUpdate(data);
+      
+      // Update local vote state if this was our vote
+      if (data.voterId === user?._id) {
+        console.log("Updating local vote state from socket:", data.votedFor);
+        const voteState = data.votedFor || null;
+        setVotedRapperId(voteState);
+        setLastSyncedVote(voteState);
+        console.log("Updated vote state to:", voteState);
+      }
+    });
 
+    return () => {
+      // Leave battle room and cleanup listeners
+      if (battleId) {
+        socket.emit("leave-battle", battleId);
+      }
+      socket.off("vote-update");
+    };
+  }, [battleId]);
 
   const checkUserVote = async () => {
-    const votedFor = await checkVote(battleId)
-    console.log("User voted for rapper ID:", votedFor)
-    setVotedRapperId(votedFor)
+    try {
+      const votedFor = await checkVote(battleId)
+      console.log("User voted for rapper ID:", votedFor)
+      setVotedRapperId(votedFor)
+      setLastSyncedVote(votedFor) // Initialize last synced vote
+      console.log("Vote state initialized - votedRapperId:", votedFor, "lastSyncedVote:", votedFor)
+    } catch (error) {
+      console.error("Error checking user vote:", error)
+    }
   }
 
   
@@ -80,25 +119,48 @@ export default function BattleDetails() {
 
   // Sync vote status every 1 minute
     useEffect(() => {
+    console.log("Vote timer effect triggered - voteTimerActive:", voteTimerActive);
     if (!voteTimerActive) return
+    
+    console.log("Starting vote timer...");
     voteTimerRef.current = setTimeout(async () => {
+      console.log("Vote timer expired - checking if vote needs to be submitted");
+      console.log("votedRapperId:", votedRapperId, "lastSyncedVote:", lastSyncedVote);
+      
       if (votedRapperId !== lastSyncedVote) {
         try {
-          const res = await axios.post(`/api/votes/${battleId}`, {
+          console.log("Submitting vote with token:", token);
+          console.log("Vote data:", { rapperId: votedRapperId, battleId });
+          console.log("Sending rapperId to server:", votedRapperId);
+          console.log("rapperId type:", typeof votedRapperId, "value:", votedRapperId);
+          
+          const res = await axios.post(`/api/votes/update/${battleId}`, {
             rapperId: votedRapperId,
           }, {
             headers: { Authorization: `Bearer ${token}` }
           })
           console.log("Vote response:", res.data)
-          setLastSyncedVote(votedRapperId)
-          setAlertMsg("Vote submitted!")
-          refreshBattle()
-        } catch {
-          setAlertMsg("Failed to submit vote.")
+          
+          // Update vote state based on server response
+          const serverVotedFor = res.data.votedFor || null;
+          setLastSyncedVote(serverVotedFor);
+          setVotedRapperId(serverVotedFor);
+          
+          console.log("Vote submission successful - updated state to:", serverVotedFor);
+          setAlertMsg(res.data.message || "Vote submitted!")
+          // Don't call refreshBattle() here - let socket handle real-time updates
+        } catch (error) {
+          console.error("Vote submission error:", error.response?.data || error.message);
+          console.error("Full error:", error);
+          setAlertMsg(`Failed to submit vote: ${error.response?.data?.message || error.message}`)
+          // Revert to last synced vote on error
+          setVotedRapperId(lastSyncedVote)
         }
+      } else {
+        console.log("No vote change detected, skipping submission");
       }
       setVoteTimerActive(false)
-    }, 500) // 1 minute
+    }, 1000) // 1 second delay for better UX
 
     return () => clearTimeout(voteTimerRef.current)
   }, [voteTimerActive, votedRapperId, lastSyncedVote, battleId, token])
@@ -108,6 +170,14 @@ export default function BattleDetails() {
   useEffect(() => {
     refreshBattle()
   }, [battleId, token])
+
+  // Sync vote state when battle data changes
+  useEffect(() => {
+    if (battle && user) {
+      console.log("Battle data updated, checking vote state...");
+      checkUserVote();
+    }
+  }, [battle, user])
 
 
   // Update progress and time remaining every minute
@@ -139,13 +209,39 @@ export default function BattleDetails() {
 
   const rapper1 = battle?.rapper1
   const rapper2 = battle?.rapper2
-  const votes = {
-    rapper1: battle?.rapper1Votes || 0,
-    rapper2: battle?.rapper2Votes || 0,
-  }
+  const [votes, setVotes] = useState({
+    rapper1Votes: 0,
+    rapper2Votes: 0
+  });
+  const [voteAnimation, setVoteAnimation] = useState(false);
 
-  const totalVotes = votes.rapper1 + votes.rapper2
-  const rapper1Percent = totalVotes === 0 ? 50 : (votes.rapper1 / totalVotes) * 100
+  // Update votes when battle data changes
+  useEffect(() => {
+    if (battle) {
+      setVotes({
+        rapper1Votes: battle.rapper1Votes || 0,
+        rapper2Votes: battle.rapper2Votes || 0
+      });
+    }
+  }, [battle]);
+
+  // Handle real-time vote updates with animation
+  const handleVoteUpdate = (newVotes) => {
+    console.log("handleVoteUpdate called with:", newVotes);
+    console.log("Current votes state:", votes);
+    
+    // Ensure we're updating with the correct vote counts from server
+    setVotes({
+      rapper1Votes: newVotes.rapper1Votes || 0,
+      rapper2Votes: newVotes.rapper2Votes || 0
+    });
+    
+    setVoteAnimation(true);
+    setTimeout(() => setVoteAnimation(false), 1000);
+  };
+  
+  const totalVotes = votes.rapper1Votes + votes.rapper2Votes
+  const rapper1Percent = totalVotes === 0 ? 50 : (votes.rapper1Votes / totalVotes) * 100
   const battleStatus = battle?.status
 
   const handleTrackUpload = async (rapperId, file, title) => {
@@ -167,9 +263,28 @@ export default function BattleDetails() {
     }
   }
 
+  // Instagram-like vote toggle functionality
   const handleVote = (rapperId) => {
+    console.log("Vote button clicked for rapper:", rapperId);
+    console.log("Current votedRapperId:", votedRapperId);
+    console.log("Current lastSyncedVote:", lastSyncedVote);
+    
     setPrevVotedRapperId(votedRapperId);
-    setVotedRapperId(prev => prev === rapperId ? null : rapperId);
+    
+    // Toggle vote: if already voted for this rapper, unvote (set to null)
+    // If voting for a different rapper, switch vote
+    // If voting for the first time, vote for this rapper
+    const newVote = votedRapperId === rapperId ? null : rapperId;
+    setVotedRapperId(newVote);
+    
+    console.log("New vote set to:", newVote);
+    console.log("Will submit vote for rapperId:", newVote);
+    
+    // Start the vote timer to submit the vote
+    if (!voteTimerActive) {
+      setVoteTimerActive(true);
+      console.log("Vote timer activated");
+    }
   };
 
   if (loading || !battle?.rapper1 || !battle?.rapper2) {
@@ -237,7 +352,7 @@ export default function BattleDetails() {
 
               <VotingComponent
                 rapperId={rapper1?._id}
-                currentVotes={votes.rapper1}
+                currentVotes={votes.rapper1Votes}
                 votedRapperId={votedRapperId}
                 prevVotedRapperId={prevVotedRapperId}
                 setVotedRapperId={handleVote}
@@ -270,7 +385,7 @@ export default function BattleDetails() {
 
               <VotingComponent
                 rapperId={rapper2?._id}
-                currentVotes={votes.rapper2}
+                currentVotes={votes.rapper2Votes}
                 votedRapperId={votedRapperId}
                 prevVotedRapperId={prevVotedRapperId}
                 setVotedRapperId={handleVote}
@@ -290,12 +405,16 @@ export default function BattleDetails() {
               <h3 className="text-yellow-400 font-bold text-lg glitch">Battle Statistics</h3>
               <div className="flex justify-center items-center gap-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-400">{votes.rapper1}</div>
+                  <div className={`text-2xl font-bold text-purple-400 ${voteAnimation ? 'animate-pulse scale-110' : ''}`}>
+                    {votes.rapper1Votes}
+                  </div>
                   <div className="text-sm text-gray-400">{rapper1?.username}</div>
                 </div>
                 <div className="text-pink-400 text-xl font-orbitron">VS</div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-pink-400">{votes.rapper2}</div>
+                  <div className={`text-2xl font-bold text-pink-400 ${voteAnimation ? 'animate-pulse scale-110' : ''}`}>
+                    {votes.rapper2Votes}
+                  </div>
                   <div className="text-sm text-gray-400">{rapper2?.username}</div>
                 </div>
               </div>

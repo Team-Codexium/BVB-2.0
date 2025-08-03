@@ -248,9 +248,10 @@ export const acceptBattle = async (req, res) => {
       { 
         
         $set:{
-          status: "active", 
+          status: "active",
+          
          startTime: new Date(),
-        endTime: new Date(Date.now() + battle.timeLimit * 60 * 1000)
+        endTime: new Date(Date.now() + battle.timeLimit * 60 * 1000*60)
         }
       },
       { new: true }

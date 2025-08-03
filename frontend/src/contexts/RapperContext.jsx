@@ -87,8 +87,10 @@ export const RapperProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       console.log('Vote checked:', res);
-      if(res) return null;
-      return res?.data.vote.votedfor;
+      if (!res.data.success || !res.data.vote || !res.data.vote.votedfor) {
+        return null;
+      }
+      return res.data.vote.votedfor;
     } catch (error) {
       console.error('Failed to check vote:', error);
       setError('Failed to check vote.');

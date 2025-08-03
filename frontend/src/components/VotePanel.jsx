@@ -19,23 +19,12 @@ export default function VotingComponent({
   const [localVotes, setLocalVotes] = useState(currentVotes)
 
   useEffect(() => {
-    // Optimistic UI: update localVotes instantly based on local vote state
-    if (votedRapperId === rapperId && prevVotedRapperId !== rapperId && prevVotedRapperId !== null) {
-      // Switched vote from other rapper to this one
-      setLocalVotes(currentVotes + 1)
-    } else if (votedRapperId === rapperId && prevVotedRapperId === null) {
-      // First time voting for this rapper
-      setLocalVotes(currentVotes + 1)
-    } else if (prevVotedRapperId === rapperId && votedRapperId !== rapperId && votedRapperId !== null) {
-      // Switched vote away from this rapper
-      setLocalVotes(currentVotes !== 0 ? currentVotes - 1 : 0)
-    } else if (votedRapperId === null && prevVotedRapperId === rapperId) {
-      // Unvoted this rapper
-      setLocalVotes(currentVotes !== 0 ? currentVotes - 1 : 0)
-    } else {
-      setLocalVotes(currentVotes)
-    }
-  }, [currentVotes, votedRapperId, prevVotedRapperId, rapperId])
+    console.log(`VotePanel ${rapperId} - currentVotes: ${currentVotes}, votedRapperId: ${votedRapperId}, prevVotedRapperId: ${prevVotedRapperId}`);
+    
+    // Always use the server-provided vote count to avoid double counting
+    setLocalVotes(currentVotes)
+    console.log(`VotePanel ${rapperId} - Updated localVotes to server count: ${currentVotes}`);
+  }, [currentVotes, rapperId])
 
   const canVote = !isContestant && battleStatus === "active"
   const isDisabled = isContestant || battleStatus !== "active"
@@ -43,10 +32,14 @@ export default function VotingComponent({
   const handleVote = () => {
     if (!canVote) return
     setIsAnimating(true)
+    console.log(`VotePanel ${rapperId} - handleVote called, current votedRapperId: ${votedRapperId}`);
+    
     // If already voted for this rapper, unvote
     if (votedRapperId === rapperId) {
+      console.log(`VotePanel ${rapperId} - Unvoting this rapper`);
       setVotedRapperId(null)
     } else {
+      console.log(`VotePanel ${rapperId} - Voting for this rapper`);
       setVotedRapperId(rapperId)
     }
     if (!voteTimerActive) setVoteTimerActive(true)
@@ -119,8 +112,10 @@ export default function VotingComponent({
             <div className="flex items-center justify-center gap-2 mb-2">
               <ThumbsUp className="w-6 h-6 text-purple-400 animate-bounce" />
               <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow">
-                {Math.floor(localVotes/2)}
+                {localVotes}
               </span>
+              {/* Real-time indicator */}
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse ml-1" title="Real-time updates active"></div>
             </div>
             <p className="text-sm text-gray-400">{localVotes === 1 ? "Vote" : "Votes"}</p>
           </div>

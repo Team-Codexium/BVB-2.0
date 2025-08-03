@@ -3,8 +3,10 @@ import jwt from "jsonwebtoken"
 
 export const verifyRapperJWT = async(req, res, next) => {
   try {
-    const token = req.cookie?.accessToken || req.header("Authorization").replace("Bearer ", "");
-    // console.log("token", token)
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+    console.log("JWT Middleware - Token:", token);
+    console.log("JWT Middleware - Headers:", req.header("Authorization"));
+    console.log("JWT Middleware - Cookies:", req.cookies);
 
     if (!token) {
       return res.status(401).json({success: false, message: "Token not found!"})
